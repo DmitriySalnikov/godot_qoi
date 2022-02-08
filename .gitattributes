@@ -8,6 +8,7 @@
 /.gitmodules		export-ignore
 /.github			export-ignore
 /LICENSE			export-ignore
+/SConstruct			export-ignore
 /*.*				export-ignore
 /godot_qoi			export-ignore
 /godot-cpp			export-ignore

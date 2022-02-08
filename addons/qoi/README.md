@@ -1,8 +1,14 @@
+<img src="https://github.com/DmitriySalnikov/godot_qoi/blob/5bd25a2dc2ea907041b4c9a7f4ae12bc0ae19a94/icon.png" width=128/>
+
 # godot_qoi
 
 This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrapper for Godot Engine. This addon will allow you to read, write, encode and decode images to or from the QOI format.
 
 This is a GDNative library. Includes precompiled binaries for `Windows` and `Linux`, but it must compile for each platform which Godot Engine supports.
+
+## Approximate comparison of QOI encoding speed vs PNG
+
+https://user-images.githubusercontent.com/7782218/152955097-285f81dc-2b65-4f80-bd6a-890b7280d806.mp4
 
 ## Support
 
@@ -12,7 +18,7 @@ This is a GDNative library. Includes precompiled binaries for `Windows` and `Lin
 
 ## Download
 
-To download, use the [Godot Asset Library](LINK_HERE) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder.
+To download, use the [Godot Asset Library](https://godotengine.org/asset-library/asset/5159) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder.
 
 ## API
 

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GDNative_Library", "GDNative_Library_only_for_developing.vcxproj", "{4D452F2C-8FBB-476B-A990-1E9E5DB73D32}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		debug|x64 = debug|x64
+		release|x64 = release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D452F2C-8FBB-476B-A990-1E9E5DB73D32}.debug|x64.ActiveCfg = debug|x64
+		{4D452F2C-8FBB-476B-A990-1E9E5DB73D32}.debug|x64.Build.0 = debug|x64
+		{4D452F2C-8FBB-476B-A990-1E9E5DB73D32}.release|x64.ActiveCfg = release|x64
+		{4D452F2C-8FBB-476B-A990-1E9E5DB73D32}.release|x64.Build.0 = release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2D6E9625-5E11-4AF3-A331-3B18E40A974D}
+	EndGlobalSection
+EndGlobal

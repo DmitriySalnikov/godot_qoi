@@ -2,6 +2,8 @@
 
 This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrapper for Godot Engine. This addon will allow you to read, write, encode and decode images to or from the QOI format.
 
+This is a GDNative library. Includes precompiled binaries for `Windows` and `Linux`, but it must compile for each platform which Godot Engine supports.
+
 ## Support
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I2I53VZ2D)
@@ -10,7 +12,7 @@ This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrappe
 
 ## Download
 
-To download, use the [Godot Asset Library](LINK_HERE) or download the archive by clicking the button at the top of the main repository page: Code -> Download ZIP, then unzip it to your project folder.
+To download, use the [Godot Asset Library](LINK_HERE) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder.
 
 ## API
 
@@ -21,19 +23,19 @@ print_errors
 
 # Read the QOI image from file
 # @return null or image
-Image read(path : String);
+Image read(path : String)
 
 # Decode the QOI image from an encoded byte array
 # @return null or image
-Image decode(data : PoolByteArray);
+Image decode(data : PoolByteArray)
 
 # Write the Image as a file in QOI format
 # @return code of error
-int write(path : String, img : Image);
+int write(path : String, img : Image)
 
 # Encode the Image in QOI format as an array of bytes
 # @return an array of bytes. If an error occurs, it is empty.
-PoolByteArray encode(img : Image);
+PoolByteArray encode(img : Image)
 ```
 
 ### Example
@@ -56,7 +58,7 @@ func example():
 ## Why is there no possibility to use images inside the editor???
 
 1. I didn't find the right way to load images. Every time a scene with QOI image was opened, an error about missing resources appeared.
-2. In Godot, there is no way to import a custom image as .stex to the .import folder.
+2. In Godot, there is no way to import a custom image as `.stex` to the `.import` folder.
 
 I know how to do this in a regular module for Godot Engine, but not in GDNative or GDScript.
 

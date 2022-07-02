@@ -7,10 +7,16 @@ reloadable=false
 
 [entry]
 
-Windows.64="res://addons/qoi/libs/godot_qoi.windows.release.64.dll"
-X11.64="res://addons/qoi/libs/libgodot_qoi.linux.release.64.so"
+OSX.64="res://addons/qoi/libs/macos/libgodot_qoi.osx.release.64.dylib"
+Windows.64="res://addons/qoi/libs/win/godot_qoi.windows.release.64.dll"
+Windows.32="res://addons/qoi/libs/win/godot_qoi.windows.release.32.dll"
+X11.64="res://addons/qoi/libs/linux/libgodot_qoi.linux.release.64.so"
+X11.32="res://addons/qoi/libs/linux/libgodot_qoi.linux.release.32.so"
 
 [dependencies]
 
+OSX.64=[  ]
 Windows.64=[  ]
+Windows.32=[  ]
 X11.64=[  ]
+X11.32=[  ]

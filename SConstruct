@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
 import os
 import sys
 import subprocess
@@ -14,7 +15,7 @@ else:
 
 # Workaround for MinGW. See:
 # http://www.scons.org/wiki/LongCmdLinesOnWin32
-if (os.name=="nt"):
+if os.name == "nt":
     import subprocess
 
     def mySubProcess(cmdline,env):
@@ -151,8 +152,8 @@ opts.Add(
 opts.Add(EnumVariable(
     'macos_arch',
     'Target macOS architecture',
-    'x86_64',
-    ['x86_64', 'arm64']
+    'universal',
+    ['universal', 'x86_64', 'arm64']
 ))
 opts.Add(EnumVariable(
     'ios_arch',
@@ -227,7 +228,14 @@ elif env['platform'] == 'osx':
             'Only 64-bit builds are supported for the macOS target.'
         )
 
-    env.Append(CCFLAGS=['-std=c++14', '-arch', env['macos_arch']])
+    if env["macos_arch"] == "universal":
+        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
+        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+
+    env.Append(CCFLAGS=['-std=c++14'])
 
     if env['macos_deployment_target'] != 'default':
         env.Append(CCFLAGS=['-mmacosx-version-min=' + env['macos_deployment_target']])
@@ -238,8 +246,6 @@ elif env['platform'] == 'osx':
         env.Append(LINKFLAGS=['-isysroot', env['macos_sdk_path']])
 
     env.Append(LINKFLAGS=[
-        '-arch',
-        env['macos_arch'],
         '-framework',
         'Cocoa',
         '-Wl,-undefined,dynamic_lookup',
@@ -386,8 +392,12 @@ elif env['platform'] == 'android':
     env['CC'] = toolchain + "/bin/clang"
     env['CXX'] = toolchain + "/bin/clang++"
     env['AR'] = toolchain + "/bin/" + arch_info['tool_path'] + "-ar"
+    env["AS"] = toolchain + "/bin/" + arch_info['tool_path'] + "-as"
+    env["LD"] = toolchain + "/bin/" + arch_info['tool_path'] + "-ld"
+    env["STRIP"] = toolchain + "/bin/" + arch_info['tool_path'] + "-strip"
+    env["RANLIB"] = toolchain + "/bin/" + arch_info['tool_path'] + "-ranlib"
 
-    env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march'], '-fPIC'])#, '-fPIE', '-fno-addrsig', '-Oz'])
+    env.Append(CCFLAGS=['--target=' + arch_info['target'] + env['android_api_level'], '-march=' + arch_info['march'], '-fPIC'])
     env.Append(CCFLAGS=arch_info['ccflags'])
 
     if env['target'] == 'debug':

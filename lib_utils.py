@@ -59,8 +59,13 @@ def gdnative_get_library_object(env):
     arch_suffix = env['bits']
     if env['platform'] == 'android':
         arch_suffix = env['android_arch']
-    if env['platform'] == 'ios':
+    elif env['platform'] == 'ios':
         arch_suffix = env['ios_arch']
+    elif env['platform'] == 'osx':
+        if env['macos_arch'] != 'universal':
+            arch_suffix = env['macos_arch']
+    elif env['platform'] == 'javascript':
+        arch_suffix = 'wasm'
 
     env.Append(CPPPATH=[
         'godot-cpp/godot-headers',

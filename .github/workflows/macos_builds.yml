@@ -1,0 +1,66 @@
+# Workflow based on that from godot-sqlite, by 2shady4u
+name: 🍏 MacOS
+on:
+  push:
+    paths: [godot_qoi/**, .github/**, lib_utils.py, SConstruct]
+  pull_request:
+    types: [opened, edited]
+  repository_dispatch:
+
+# Stop the same workflow actions
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+# Global Settings
+env:
+  PROJECT_FOLDER: .
+  TARGET_PATH: bin
+  TARGET_NAME: libgodot_qoi
+
+jobs:
+  macos-compilation:
+    name: MacOS Compilation ${{ matrix.name }}
+    runs-on: "macos-latest"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      # Use python 3.x release (works cross platform; best to keep self contained in it's own step)
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: "3.x"
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: "x64"
+
+      # Setup scons, print python version and scons version info, so if anything is broken it won't run the build.
+      - name: Configuring Python packages
+        run: |
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Compilation
+        run: |
+          cd godot-cpp
+          git apply ../godot_cpp_restrict_used_classes.patch
+          scons platform=osx target=release generate_bindings=yes -j4
+          cd ..
+          scons platform=osx target=release -j4
+
+      - name: Prepare artifact
+        run: |
+          strip -u bin/libgodot_qoi.osx.release.64.dylib
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos
+          retention-days: 7
+          path: ${{env.TARGET_PATH}}/*

@@ -1,0 +1,79 @@
+# Workflow based on that from godot-sqlite, by 2shady4u
+name: 🪟 Windows
+on:
+  push:
+    paths: [godot_qoi/**, .github/**, lib_utils.py, SConstruct]
+  pull_request:
+    types: [opened, edited]
+  repository_dispatch:
+
+# Stop the same workflow actions
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+# Global Settings
+env:
+  PROJECT_FOLDER: .
+  TARGET_PATH: bin
+  TARGET_NAME: godot_qoi
+
+jobs:
+  windows-compilation:
+    name: Windows Compilation ${{ matrix.name }}
+    runs-on: "windows-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: x64
+            bits: 64
+            bin: "bin/godot_qoi.windows.release.64.dll"
+
+          - name: x86
+            bits: 32
+            bin: "bin/godot_qoi.windows.release.32.dll"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      # Use python 3.x release (works cross platform; best to keep self contained in it's own step)
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: "3.x"
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: "x64"
+
+      # Setup scons, print python version and scons version info, so if anything is broken it won't run the build.
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons pywin32
+          python --version
+          scons --version
+
+      - name: Compilation
+        run: |
+          cd godot-cpp
+          git apply ../godot_cpp_restrict_used_classes.patch
+          scons platform=windows bits=${{ matrix.bits }} target=release generate_bindings=yes -j4
+          cd ..
+          scons platform=windows bits=${{ matrix.bits }} target=release -j4
+
+      - name: Prepare artifact
+        run: |
+          Remove-Item ${{env.TARGET_PATH}}/* -Include *.exp,*.lib,*.pdb -Force
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: win
+          retention-days: 7
+          path: ${{env.TARGET_PATH}}/*

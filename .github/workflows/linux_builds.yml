@@ -1,7 +1,7 @@
 name: 🐧 Linux
 on:
   push:
-    paths: [godot_qoi/**, .github/**, lib_utils.py, SConstruct]
+    paths: [godot_qoi/**, .github/**, '!.github/**/util_*', '**.patch', lib_utils.py, SConstruct]
   pull_request:
     types: [opened, edited]
   repository_dispatch:

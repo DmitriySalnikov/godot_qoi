@@ -23,7 +23,7 @@ runs:
         architecture: "x64"
 
     - name: Configuring Python packages
-      shell: sh
+      shell: bash
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
           python -m pip install pywin32
@@ -37,11 +37,12 @@ runs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        # The actual dependencies
-        sudo apt-get install gcc-multilib g++-multilib
+        if [[ "${{ inputs.bits }}" == *"32" ]];then
+          sudo apt-get install gcc-multilib g++-multilib
+        fi
 
     - name: Compilation
-      shell: sh
+      shell: bash
       run: |
         cd godot-cpp
         git apply ../godot_cpp_trim_unused_classes.patch
@@ -51,7 +52,7 @@ runs:
 
     - name: Prepare artifact Unix
       if: runner.os != 'Windows'
-      shell: sh
+      shell: bash
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
           strip -u bin/*

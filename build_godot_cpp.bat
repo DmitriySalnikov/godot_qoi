@@ -5,7 +5,7 @@ set api=
 
 git apply ../godot_cpp_trim_unused_classes.patch
 
-title win x64 release
+title win x64
 scons platform=windows target=release bits=64 -j%cpu% %api% generate_bindings=yes
 if errorlevel 1 ( echo Failed to generate godot-cpp source code. Code: %errorlevel% && exit /b %errorlevel% )
 

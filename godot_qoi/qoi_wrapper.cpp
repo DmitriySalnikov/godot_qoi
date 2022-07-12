@@ -11,8 +11,7 @@
 
 using namespace godot;
 
-void QOI::print_error(String error, String func, String file, int line)
-{
+void QOI::print_error(String error, String func, String file, int line) {
 	if (print_errors)
 		Godot::print_error(error, func, file, line);
 }
@@ -36,7 +35,7 @@ Ref<Image> QOI::read(String path) {
 
 	auto err = f->open(path, File::ModeFlags::READ);
 	if (err != Error::OK) {
-		print_error("Could not open the file for reading: " + path, __FUNCTION__, __FILE__, __LINE__);
+		print_error("Could not open the file for reading: " + path + ". Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
 		return Ref<Image>();
 	}
 
@@ -44,7 +43,7 @@ Ref<Image> QOI::read(String path) {
 	return decode(data);
 }
 
-Ref<Image> QOI::decode(PoolByteArray data) {
+Ref<Image> QOI::decode(const PoolByteArray &data) {
 	if (data.size() == 0) {
 		print_error("Image data cannot be empty", __FUNCTION__, __FILE__, __LINE__);
 		return Ref<Image>();
@@ -53,24 +52,18 @@ Ref<Image> QOI::decode(PoolByteArray data) {
 	qoi_desc dec;
 	void *out;
 
-	{
-		auto read = data.read();
-		out = qoi_decode(read.ptr(), data.size(), &dec, 0);
-
-		if (out == NULL) {
-			print_error("Unable to decode data", __FUNCTION__, __FILE__, __LINE__);
-			return Ref<Image>();
-		}
+	out = qoi_decode(data.read().ptr(), data.size(), &dec, 0);
+	if (out == NULL) {
+		print_error("Unable to decode data", __FUNCTION__, __FILE__, __LINE__);
+		return Ref<Image>();
 	}
 
 	PoolByteArray img_data;
+
 	img_data.resize(dec.channels * dec.width * dec.height);
 
-	{
-		auto write = img_data.write();
-		memcpy(write.ptr(), out, img_data.size());
-		::free(out);
-	}
+	memcpy(img_data.write().ptr(), out, img_data.size());
+	::free(out);
 
 	Ref<Image> img;
 	img.instance();
@@ -90,7 +83,7 @@ int QOI::write(String path, Ref<Image> img) {
 
 	auto err = f->open(path, File::ModeFlags::WRITE);
 	if (err != Error::OK) {
-		print_error("Could not open the file for writing: " + path, __FUNCTION__, __FILE__, __LINE__);
+		print_error("Could not open the file for writing: " + path + ". Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
 		return (int)err;
 	}
 
@@ -101,7 +94,7 @@ int QOI::write(String path, Ref<Image> img) {
 	f->store_buffer(b);
 	err = f->get_error();
 	if (err != Error::OK) {
-		print_error("Failed to write data to file", __FUNCTION__, __FILE__, __LINE__);
+		print_error("Failed to write data to file " + path + ". Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
 		return (int)err;
 	}
 
@@ -116,14 +109,18 @@ PoolByteArray QOI::encode(Ref<Image> img) {
 		return PoolByteArray();
 	}
 
+	bool has_alpha = img->detect_alpha();
+
 	if (img->get_format() != Image::Format::FORMAT_RGB8 && img->get_format() != Image::Format::FORMAT_RGBA8) {
 		// try to convert
-		img->convert(Image::Format::FORMAT_RGBA8);
+		img->convert(has_alpha ? Image::Format::FORMAT_RGBA8 : Image::Format::FORMAT_RGB8);
 
 		if (img->get_format() != Image::Format::FORMAT_RGB8 && img->get_format() != Image::Format::FORMAT_RGBA8) {
 			print_error("Unsupported image format", __FUNCTION__, __FILE__, __LINE__);
 			return PoolByteArray();
 		}
+	} else {
+		img->convert(has_alpha ? Image::Format::FORMAT_RGBA8 : Image::Format::FORMAT_RGB8);
 	}
 
 	qoi_desc enc = {
@@ -135,26 +132,20 @@ PoolByteArray QOI::encode(Ref<Image> img) {
 
 	int len = 0;
 	void *out;
-	{
-		img->lock();
-		auto data = img->get_data();
-		auto read = data.read();
-		out = qoi_encode(read.ptr(), &enc, &len);
-		if (out == NULL) {
-			print_error("Unable to encode the image", __FUNCTION__, __FILE__, __LINE__);
-			return PoolByteArray();
-		}
-		img->unlock();
+
+	img->lock();
+	out = qoi_encode(img->get_data().read().ptr(), &enc, &len);
+	if (out == NULL) {
+		print_error("Unable to encode the image", __FUNCTION__, __FILE__, __LINE__);
+		return PoolByteArray();
 	}
+	img->unlock();
 
 	PoolByteArray res;
 	res.resize(len);
 
-	{
-		auto write = res.write();
-		memcpy(write.ptr(), out, len);
-		::free(out);
-	}
+	memcpy(res.write().ptr(), out, len);
+	::free(out);
 
 	return res;
 }

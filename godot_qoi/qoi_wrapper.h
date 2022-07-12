@@ -3,8 +3,8 @@
 #pragma once
 
 #include <Godot.hpp>
-#include <Reference.hpp>
 #include <Image.hpp>
+#include <Reference.hpp>
 
 using namespace godot;
 
@@ -21,8 +21,7 @@ public:
 	bool print_errors = true;
 
 	Ref<Image> read(String path);
-	Ref<Image> decode(PoolByteArray data);
+	Ref<Image> decode(const PoolByteArray &data);
 	int write(String path, Ref<Image> img);
 	PoolByteArray encode(Ref<Image> img);
-
 };

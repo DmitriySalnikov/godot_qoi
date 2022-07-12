@@ -14,9 +14,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{4D452F2C-8FBB-476B-A990-1E9E5DB73D32}</ProjectGuid>
-    <RootNamespace>GDNative_Library</RootNamespace>
+    <RootNamespace>QOI_Library</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>GDNative_Library</ProjectName>
+    <ProjectName>QOI_Library</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="Configuration">
@@ -48,7 +48,7 @@
     <IncludePath>$(ProjectDir)godot-cpp\include;$(ProjectDir)godot-cpp\godot-headers;$(ProjectDir)godot-cpp\include\gen;$(ProjectDir)godot-cpp\include\core;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)godot-cpp\bin;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\</OutDir>
-    <TargetName>godot_qoi.windows.$(Configuration).$(PlatformArchitecture)</TargetName>
+    <TargetName>godot_qoi.windows.release.$(PlatformArchitecture)</TargetName>
     <IntDir>$(SolutionDir)obj\$(PlatformTarget)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -57,7 +57,7 @@
     <IncludePath>$(ProjectDir)godot-cpp\include;$(ProjectDir)godot-cpp\godot-headers;$(ProjectDir)godot-cpp\include\gen;$(ProjectDir)godot-cpp\include\core;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)godot-cpp\bin;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\</OutDir>
-    <TargetName>godot_qoi.windows.$(Configuration).$(PlatformArchitecture)</TargetName>
+    <TargetName>godot_qoi.windows.release.$(PlatformArchitecture)</TargetName>
     <IntDir>$(SolutionDir)obj\$(PlatformTarget)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
@@ -97,6 +97,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp14</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -110,11 +111,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="godot_qoi\qoi_import.cpp" />
+    <ClCompile Include="godot_qoi\qoi_plugin.cpp" />
+    <ClCompile Include="godot_qoi\qoi_utils.cpp" />
     <ClCompile Include="godot_qoi\qoi_wrapper.cpp" />
     <ClCompile Include="godot_qoi\register_types.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="godot_qoi\qoi.h" />
+    <ClInclude Include="godot_qoi\qoi_import.h" />
+    <ClInclude Include="godot_qoi\qoi_plugin.h" />
+    <ClInclude Include="godot_qoi\qoi_utils.h" />
     <ClInclude Include="godot_qoi\qoi_wrapper.h" />
     <ClInclude Include="godot_qoi\register_types.h" />
   </ItemGroup>

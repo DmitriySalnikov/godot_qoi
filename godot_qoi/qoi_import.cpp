@@ -52,18 +52,20 @@ String QOIImport::get_resource_type() {
 }
 
 int64_t QOIImport::get_preset_count() {
-	return 1;
+	return 3;
 }
 
 String QOIImport::get_preset_name(const int64_t preset) {
-	return "Default";
+	static Array presets = Array::make("Default", "Pixel", "3D");
+	return presets[(int)preset];
 }
 
 Array QOIImport::get_import_options(const int64_t preset) {
+	static char flags_map[3] = {4, 0, 7};
 	return Array::make(
 			Dictionary::make(
 					"name", QOIUtils::QOI_IMPORT_FLAGS,
-					"default_value", 7,
+					"default_value", flags_map[preset],
 					"property_hint", GlobalConstants::PROPERTY_HINT_FLAGS,
 					"hint_string", "Mipmaps,Repeat,Filter,Anisotropic,sRGB,Mirrored Repeat"),
 			Dictionary::make(
@@ -73,7 +75,7 @@ Array QOIImport::get_import_options(const int64_t preset) {
 					"hint_string", "0,8192"),
 			Dictionary::make(
 					"name", QOIUtils::QOI_IMPORT_FIX_ALPHA_BORDER,
-					"default_value", false,
+					"default_value", preset != 2 ? true : false,
 					"property_hint", GlobalConstants::PROPERTY_HINT_NONE,
 					"hint_string", ""),
 			Dictionary::make(

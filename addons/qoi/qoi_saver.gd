@@ -38,7 +38,7 @@ func save(path: String, resource: Resource, _flags: int) -> int:
 	err = qoi_utils.add_footer(path, options)
 	
 	# Fix .import file options
-	var file = File.new()
+	var file := File.new()
 	file.open("res://.import/%s-%s" % [path.get_file(), path.md5_text()] + ".qoi_save_as", File.WRITE)
 	file.store_var(options)
 	file.close()

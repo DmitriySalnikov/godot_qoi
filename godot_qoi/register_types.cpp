@@ -7,12 +7,17 @@
 #include <EditorPlugin.hpp>
 #include <File.hpp>
 #include <Godot.hpp>
+#include <ImageTexture.hpp>
 #include <ProjectSettings.hpp>
 #include <Resource.hpp>
+#include <ResourceFormatSaver.hpp>
 #include <ResourceImporter.hpp>
+#include <Texture.hpp>
 
+#ifndef NO_EDITOR
 #include "qoi_import.h"
 #include "qoi_plugin.h"
+#endif
 #include "qoi_utils.h"
 #include "qoi_wrapper.h"
 
@@ -33,6 +38,8 @@ extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o) {
 	godot::_TagDB::register_global_type("EditorImportPlugin", typeid(EditorImportPlugin).hash_code(), typeid(ResourceImporter).hash_code());
 	godot::_TagDB::register_global_type("ConfigFile", typeid(ConfigFile).hash_code(), typeid(Reference).hash_code());
 	godot::_TagDB::register_global_type("Reference", typeid(Reference).hash_code(), typeid(Object).hash_code());
+	godot::_TagDB::register_global_type("Texture", typeid(Texture).hash_code(), typeid(Resource).hash_code());
+	godot::_TagDB::register_global_type("ImageTexture", typeid(ImageTexture).hash_code(), typeid(Texture).hash_code());
 	godot::_TagDB::register_global_type("_Directory", typeid(Directory).hash_code(), typeid(Reference).hash_code());
 	godot::_TagDB::register_global_type("_File", typeid(File).hash_code(), typeid(Reference).hash_code());
 
@@ -45,6 +52,8 @@ extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o) {
 	EditorImportPlugin::___init_method_bindings();
 	ConfigFile::___init_method_bindings();
 	Reference::___init_method_bindings();
+	Texture::___init_method_bindings();
+	ImageTexture::___init_method_bindings();
 	Directory::___init_method_bindings();
 	File::___init_method_bindings();
 }
@@ -64,6 +73,9 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
 
 	register_tool_class<QOI>();
 	register_tool_class<QOIUtils>();
+
+#ifndef NO_EDITOR
 	register_tool_class<QOIPlugin>();
 	register_tool_class<QOIImport>();
+#endif
 }

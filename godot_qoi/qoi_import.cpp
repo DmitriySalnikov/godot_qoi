@@ -37,8 +37,7 @@ String QOIImport::get_visible_name() {
 }
 
 Array QOIImport::get_recognized_extensions() {
-	Array a;
-	a.append("qoi");
+	static Array a = Array::make("qoi");
 	return a;
 }
 
@@ -110,26 +109,19 @@ int64_t QOIImport::import(const String source_file, const String save_path, cons
 		return (int)err;
 	}
 
-	// Force set options from Save As... if exists
+	// Get options from the footer if it exists but '[file].import' doesn't exists
 	{
 		Ref<Directory> dir;
 		dir.instance();
-		String save_as = save_path + ".qoi_save_as";
-		if (dir->file_exists(save_as)) {
-			Ref<File> f;
-			f.instance();
-			err = f->open(save_as, File::READ);
-
-			if ((int)err) {
-				Godot::print_error("Can't open QOI 'Save As...' config. Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
-				return (int)err;
+		String import_file = source_file + ".import";
+		if (!dir->file_exists(import_file)) {
+			Dictionary footer = qoi_utils->read_footer(source_file);
+			if (!footer.has(QOIUtils::QOI_IMPORT_ERROR)) {
+				qoi_utils->update_dictionary(fin_options, footer);
 			}
 
-			fin_options = f->get_var();
-			f->close();
-			dir->remove(save_as);
-
-			call_deferred("_update_config_file", source_file + ".import", fin_options);
+			// Forced update of the .import file according to the new options
+			call_deferred("_update_config_file", import_file, fin_options);
 		}
 	}
 
@@ -203,7 +195,7 @@ int64_t QOIImport::import(const String source_file, const String save_path, cons
 		return (int)err;
 	}
 
-	return qoi_utils->add_footer(target_path, fin_options);
+	return qoi_utils->add_footer(target_path, fin_options, false);
 }
 
 // Hack to sync options in the .import file after the Save As... operation

@@ -8,7 +8,7 @@ func get_recognized_extensions() -> PoolStringArray:
 	return PoolStringArray(["qoi", "qoi_import"])
 
 func get_resource_type(path: String) -> String:
-	return "ImageTexture"
+	return "ImageTexture" if path.get_extension().to_lower() in get_recognized_extensions() else ""
 
 func handles_type(typename: String) -> bool:
 	return typename == "ImageTexture"

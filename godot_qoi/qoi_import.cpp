@@ -23,7 +23,6 @@ void QOIImport::_register_methods() {
 
 void QOIImport::_init() {
 	qoi_wrapper.instance();
-	QOIUtils::_new();
 	qoi_utils.instance();
 
 	qoi_wrapper->print_errors = ProjectSettings::get_singleton()->get_setting("debug/settings/qoi_import/print_debug");
@@ -61,7 +60,7 @@ String QOIImport::get_preset_name(const int64_t preset) {
 }
 
 Array QOIImport::get_import_options(const int64_t preset) {
-	static char flags_map[3] = {4, 0, 7};
+	static char flags_map[3] = { 4, 0, 7 };
 	return Array::make(
 			Dictionary::make(
 					"name", QOIUtils::QOI_IMPORT_FLAGS,

@@ -27,6 +27,12 @@ jobs:
           workflow: linux_builds.yml
           path: extracted_files
       
+      - name: Download Android Binaries
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: android_builds.yml
+          path: extracted_files
+      
       - name: Download MacOS Binaries
         uses: dawidd6/action-download-artifact@v2
         with:

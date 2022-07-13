@@ -1,4 +1,4 @@
-name: ↗️ Update binaries from artifacts
+name: 1. 📦 Collect binaries from artifacts
 
 on:
   workflow_dispatch:
@@ -9,12 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          lfs: true
-          submodules: recursive
-      
       - name: Download Windows Binaries
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -39,17 +33,9 @@ jobs:
           workflow: macos_builds.yml
           path: extracted_files
       
-      - name: Replace with new files
-        run: |
-          ls extracted_files/*
-          rm -rf addons/qoi/libs/
-          mv -f extracted_files addons/qoi/libs
-
-      - name: Commit report
-        run: |
-          git config --global user.name 'Auto Updater'
-          git config --global user.email 'auto-updater@users.noreply.github.com'
-          git diff
-          git add -A
-          git commit -am "[CI] ↗️ Updated Binaries"
-          git push
+      - name: Upload GDNative
+        uses: actions/upload-artifact@v3
+        with:
+          name: gdnative_libs
+          retention-days: 7
+          path: extracted_files/*

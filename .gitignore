@@ -33,3 +33,4 @@ __pycache__
 .mono/
 obj/
 bin/
+/libs/

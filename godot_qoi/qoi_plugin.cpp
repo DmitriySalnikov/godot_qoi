@@ -8,11 +8,11 @@ void QOIPlugin::_register_methods() {
 }
 
 void QOIPlugin::_init() {
-	qoi_importer.instance();
-
 	String prnt_dbg = "debug/settings/qoi_import/print_debug";
 	if (!ProjectSettings::get_singleton()->has_setting(prnt_dbg))
 		ProjectSettings::get_singleton()->set_setting(prnt_dbg, true);
+
+	qoi_importer.instance();
 }
 
 void QOIPlugin::_enter_tree() {

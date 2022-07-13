@@ -5,7 +5,9 @@ class_name QOISaver
 var qoi_utils = preload("qoi_utils.gdns").new()
 
 func get_recognized_extensions(resource: Resource) -> PoolStringArray:
-	return PoolStringArray(["qoi"])
+	if resource is Texture:
+		return PoolStringArray(["qoi"])
+	return PoolStringArray()
 
 func recognize(resource: Resource) -> bool:
 	return resource is Texture and resource.get_data() and !resource.get_data().is_empty()

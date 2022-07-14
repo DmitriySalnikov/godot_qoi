@@ -16,7 +16,7 @@ This is a GDNative library. Includes precompiled binaries for `Windows`, `Linux`
 
 ## Disadvantage
 
-* Large image file size
+* Large file size (compared to PNG or WebP. more than 2-3 times larger)
 * No VRAM compression
 
 ## Approximate comparison of QOI encoding speed vs PNG
@@ -29,9 +29,29 @@ https://user-images.githubusercontent.com/7782218/152955097-285f81dc-2b65-4f80-b
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/dmitriysalnikov)
 
+[<img src="https://jobs.qiwi.com/assets/media/logo-mobile.83a2407e.svg" alt="qiwi" width=90px/>](https://qiwi.com/n/DMITRIYSALNIKOV)
+
 ## Download
 
 To download, use the [Godot Asset Library](https://godotengine.org/asset-library/asset/5159) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder.
+
+## Editor integration
+
+* After installation, do not forget to enable the plugin in the project settings.
+
+As with regular textures, `qoi` can be used as sprites or textures of materials. QOI will be imported into the `.import` folder to write additional settings to the original `.qoi` file.
+
+Import parameters are also available:
+
+![godot windows opt tools 64_nPWBco0itA](https://user-images.githubusercontent.com/7782218/178936308-6dbb0d6a-c742-4635-87ea-f46c6fa44645.png)
+
+And you can save any texture as a `qoi` image directly in the editor:
+
+![godot windows opt tools 64_xrBag12kP4](https://user-images.githubusercontent.com/7782218/178931905-00a45d4e-a331-4ccd-8a45-551831786db0.png)
+
+### How to remove the editor integration?
+
+If you do not need integration into the editor, you can simply delete or not extract the `addons/qoi/editor/` folder. You will still be able to work with images using scripts, but the editor will not recognize qoi.
 
 ## API
 
@@ -60,7 +80,7 @@ PoolByteArray encode(img : Image)
 ### Example
 
 ```gdscript
-func test_api():
+func example():
 	var qoi = load("res://addons/qoi/qoi.gdns").new()
 	qoi.print_errors = true
 	

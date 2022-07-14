@@ -2,7 +2,7 @@ tool
 extends Control
 
 const img_dir = "res://testsuite/images/"
-export(int, 1, 256) var test_runs = 10
+export(int, 0, 256) var test_runs = 10
 export(int, 1, 256) var frames_to_render = 99
 export(int, 1, 8192) var image_width = 1920
 export(int, 1, 8192) var image_height = 1080
@@ -76,7 +76,7 @@ func start_bench():
 	var is_webp
 	var is_lossy
 	if ProjectSettings.has_setting("rendering/misc/lossless_compression/force_png"):
-		is_lossy = ProjectSettings.get_setting("importer_defaults/texture")["compress/mode"] == 1
+		is_lossy = ProjectSettings.has_setting("importer_defaults/texture") && ProjectSettings.get_setting("importer_defaults/texture")["compress/mode"] == 1
 		is_webp = !ProjectSettings.get_setting("rendering/misc/lossless_compression/force_png") || is_lossy
 	
 	if is_vram:

@@ -34,3 +34,4 @@ __pycache__
 obj/
 bin/
 /libs/
+testsuite/images/

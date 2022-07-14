@@ -4,7 +4,20 @@
 
 This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrapper for Godot Engine. This addon will allow you to read, write, encode and decode images to or from the QOI format.
 
-This is a GDNative library. Includes precompiled binaries for `Windows` and `Linux`, but it must compile for each platform which Godot Engine supports.
+This is a GDNative library. Includes precompiled binaries for `Windows`, `Linux`, `macOS` and `Android`, but it must compile for each platform which Godot Engine supports.
+
+## Features
+
+* Fastest encoding
+* Fast decoding
+* Editor integration
+* Cross-platform
+* Simple API
+
+## Disadvantage
+
+* Large image file size
+* No VRAM compression
 
 ## Approximate comparison of QOI encoding speed vs PNG
 
@@ -47,28 +60,200 @@ PoolByteArray encode(img : Image)
 ### Example
 
 ```gdscript
-func example():
-    var qoi = load("res://addons/qoi/qoi.gdns").new()
-    qoi.print_errors = true
-
-    qoi.write("res://example.qoi", load("res://icon.png").get_data())
-    var img = qoi.read("res://example.qoi")
-    var enc = qoi.encode(img)
-    var dec = qoi.decode(enc)
-
-    var tex: = ImageTexture.new()
-    tex.create_from_image(dec)
-    $TextureRect.texture = tex
+func test_api():
+	var qoi = load("res://addons/qoi/qoi.gdns").new()
+	qoi.print_errors = true
+	
+	qoi.write("user://example.qoi", load("res://icon.png").get_data())
+	var img = qoi.read("user://example.qoi")
+	var enc = qoi.encode(img)
+	var dec = qoi.decode(enc)
+	
+	var tex: = ImageTexture.new()
+	tex.create_from_image(dec)
+	$TextureRect.texture = tex
 ```
 
-## Why is there no possibility to use images inside the editor???
+## Benchmarks
 
-1. I didn't find the right way to load images. Every time a scene with QOI image was opened, an error about missing resources appeared.
-2. In Godot, there is no way to import a custom image as `.stex` to the `.import` folder.
+To get these logs, the scene "testsuite/TestScene.tscn" was used.
 
-I know how to do this in a regular module for Godot Engine, but not in GDNative or GDScript.
+Perhaps someone will need this data...
 
-But you can create a pull request with a solution to these problems.
+```txt
+--- Based on default '2D' preset. Only compression mode changed ---
+
+--- Avg for 5 runs, with 1920x1080 99 frames
+
+-- Android, Honor 9X China, Kirin 810, Mali-G52 (MP6)
+
+webp lossy:	26698.691 ms
+webp:		28159.032 ms
+etc2:		2823.541 ms
+png:		29960.048 ms
+qoi:		10672.911 ms
+
+-- Windows 11, i7 3770, GTX 970
+
+webp lossy:	1665.573 ms
+webp:		2071.083 ms
+s3tc:		192.595 ms
+png:		4656.091 ms
+qoi:		1939.103 ms
+```
+
+<details>
+<summary>Detailed logs</summary>
+
+```txt
+--- Based on default '2D' preset. Only compression mode changed ---
+
+-- Android, Honor 9X China, Kirin 810, Mali-G52 (MP6)
+
+VRAM Compression:
+
+Run: 0, Ext: png, 2931.171 ms
+Run: 1, Ext: png, 2760.742 ms
+Run: 2, Ext: png, 2815.537 ms
+Run: 3, Ext: png, 2811.050 ms
+Run: 4, Ext: png, 2799.204 ms
+Run: 0, Ext: qoi, 10739.582 ms
+Run: 1, Ext: qoi, 10636.819 ms
+Run: 2, Ext: qoi, 10613.298 ms
+Run: 3, Ext: qoi, 10688.168 ms
+Run: 4, Ext: qoi, 10738.884 ms
+Note 'importer_defaults/texture[compress/mode]' is not equal to 0. PNG was imported as VRAM compressed texture inside .import folder
+Platform: Android
+Avg for 5 runs, with 1920x1080 99 frames
+etc2:        2823.541 ms
+qoi: 10683.350 ms
+
+WebP Lossy:
+
+Run: 0, Ext: png, 26653.431 ms
+Run: 1, Ext: png, 26598.585 ms
+Run: 2, Ext: png, 26718.401 ms
+Run: 3, Ext: png, 26750.491 ms
+Run: 4, Ext: png, 26772.548 ms
+Run: 0, Ext: qoi, 10593.349 ms
+Run: 1, Ext: qoi, 10656.931 ms
+Run: 2, Ext: qoi, 10685.101 ms
+Run: 3, Ext: qoi, 10625.928 ms
+Run: 4, Ext: qoi, 10657.248 ms
+Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG was imported as WebP inside .import folderPlatform: Android
+Avg for 5 runs, with 1920x1080 99 frames
+webp lossy:  26698.691 ms
+qoi: 10643.711 ms
+
+WebP Lossless:
+
+Run: 0, Ext: png, 28225.728 ms
+Run: 1, Ext: png, 28185.932 ms
+Run: 2, Ext: png, 28140.142 ms
+Run: 3, Ext: png, 28097.408 ms
+Run: 4, Ext: png, 28145.951 ms
+Run: 0, Ext: qoi, 10669.436 ms
+Run: 1, Ext: qoi, 10664.980 ms
+Run: 2, Ext: qoi, 10683.432 ms
+Run: 3, Ext: qoi, 10702.113 ms
+Run: 4, Ext: qoi, 10638.751 ms
+Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG was imported as WebP inside .import folderPlatform: Android
+Avg for 5 runs, with 1920x1080 99 frames
+webp:        28159.032 ms
+qoi: 10671.742 ms
+
+PNG:
+
+Run: 0, Ext: png, 30080.978 ms
+Run: 1, Ext: png, 29911.152 ms
+Run: 2, Ext: png, 29905.833 ms
+Run: 3, Ext: png, 29961.291 ms
+Run: 4, Ext: png, 29940.987 ms
+Run: 0, Ext: qoi, 10733.422 ms
+Run: 1, Ext: qoi, 10697.980 ms
+Run: 2, Ext: qoi, 10656.909 ms
+Run: 3, Ext: qoi, 10710.381 ms
+Run: 4, Ext: qoi, 10665.515 ms
+Platform: Android
+Avg for 5 runs, with 1920x1080 99 frames
+png: 29960.048 ms
+qoi: 10692.841 ms
+
+-- Windows 11, i7 3770, GTX 970
+
+VRAM Compression:
+
+Run: 0, Ext: png, 273.765 ms
+Run: 1, Ext: png, 176.404 ms
+Run: 2, Ext: png, 170.142 ms
+Run: 3, Ext: png, 172.205 ms
+Run: 4, Ext: png, 170.459 ms
+Run: 0, Ext: qoi, 1966.354 ms
+Run: 1, Ext: qoi, 1963.467 ms
+Run: 2, Ext: qoi, 1962.730 ms
+Run: 3, Ext: qoi, 1973.714 ms
+Run: 4, Ext: qoi, 1943.954 ms
+Note 'importer_defaults/texture[compress/mode]' is not equal to 0. PNG was imported as VRAM compressed texture inside .import folder
+Platform: Windows
+Avg for 5 runs, with 1920x1080 99 frames
+s3tc:   192.595 ms
+qoi:    1962.044 ms
+
+WebP Lossy:
+
+Run: 0, Ext: png, 1702.099 ms
+Run: 1, Ext: png, 1660.662 ms
+Run: 2, Ext: png, 1653.947 ms
+Run: 3, Ext: png, 1633.476 ms
+Run: 4, Ext: png, 1677.683 ms
+Run: 0, Ext: qoi, 1891.697 ms
+Run: 1, Ext: qoi, 1910.959 ms
+Run: 2, Ext: qoi, 1891.640 ms
+Run: 3, Ext: qoi, 1889.121 ms
+Run: 4, Ext: qoi, 1934.738 ms
+Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG was imported as WebP inside .import folder
+Platform: Windows
+Avg for 5 runs, with 1920x1080 99 frames
+webp lossy:     1665.573 ms
+qoi:    1903.631 ms
+
+WebP Lossless:
+
+Run: 0, Ext: png, 2166.656 ms
+Run: 1, Ext: png, 2164.790 ms
+Run: 2, Ext: png, 2022.571 ms
+Run: 3, Ext: png, 1983.932 ms
+Run: 4, Ext: png, 2017.466 ms
+Run: 0, Ext: qoi, 1989.682 ms
+Run: 1, Ext: qoi, 1894.387 ms
+Run: 2, Ext: qoi, 1915.186 ms
+Run: 3, Ext: qoi, 1922.443 ms
+Run: 4, Ext: qoi, 1913.443 ms
+Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG was imported as WebP inside .import folder
+Platform: Windows
+Avg for 5 runs, with 1920x1080 99 frames
+webp:   2071.083 ms
+qoi:    1927.028 ms
+
+PNG:
+
+Run: 0, Ext: png, 4688.020 ms
+Run: 1, Ext: png, 4595.850 ms
+Run: 2, Ext: png, 4634.695 ms
+Run: 3, Ext: png, 4661.570 ms
+Run: 4, Ext: png, 4700.321 ms
+Run: 0, Ext: qoi, 1972.156 ms
+Run: 1, Ext: qoi, 1949.307 ms
+Run: 2, Ext: qoi, 1976.162 ms
+Run: 3, Ext: qoi, 1954.153 ms
+Run: 4, Ext: qoi, 1966.760 ms
+Platform: Windows
+Avg for 5 runs, with 1920x1080 99 frames
+png:    4656.091 ms
+qoi:    1963.708 ms
+```
+
+</details>
 
 ## License
 

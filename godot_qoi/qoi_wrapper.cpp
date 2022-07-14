@@ -43,7 +43,7 @@ Ref<Image> QOI::read(String path) {
 	return decode(data);
 }
 
-Ref<Image> QOI::decode(const PoolByteArray &data) {
+Ref<Image> QOI::decode(PoolByteArray data) {
 	if (data.size() == 0) {
 		print_error("Image data cannot be empty", __FUNCTION__, __FILE__, __LINE__);
 		return Ref<Image>();

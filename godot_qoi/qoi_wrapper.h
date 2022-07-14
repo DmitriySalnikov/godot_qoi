@@ -21,7 +21,7 @@ public:
 	bool print_errors = true;
 
 	Ref<Image> read(String path);
-	Ref<Image> decode(const PoolByteArray &data);
+	Ref<Image> decode(PoolByteArray data);
 	int write(String path, Ref<Image> img);
 	PoolByteArray encode(Ref<Image> img);
 };

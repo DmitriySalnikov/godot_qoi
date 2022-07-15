@@ -2,11 +2,13 @@ tool
 extends Control
 
 const img_dir = "res://testsuite/images/"
-export(int, 0, 256) var test_runs = 10
+export var run_tests = false
+export var run_benchmark = true
+export(int, 0, 256) var bench_runs = 5
 export(int, 1, 256) var frames_to_render = 99
 export(int, 1, 8192) var image_width = 1920
 export(int, 1, 8192) var image_height = 1080
-export var render : bool = false setget set_render
+export var render_test_images : bool = false setget set_render
 
 onready var grid := $GridContainer
 
@@ -14,8 +16,9 @@ func _ready() -> void:
 	if not Engine.editor_hint:
 		$ViewportContainer.queue_free()
 		test_api()
-		yield(get_tree(), "idle_frame")
-		start_bench()
+		if run_benchmark:
+			yield(get_tree(), "idle_frame")
+			start_bench()
 
 func test_api():
 	var qoi = load("res://addons/qoi/qoi.gdns").new()
@@ -29,6 +32,81 @@ func test_api():
 	var tex: = ImageTexture.new()
 	tex.create_from_image(dec)
 	$TextureRect.texture = tex
+	
+	# More tests
+	
+	if !run_tests:
+		return
+	
+	if tex.get_data().is_empty():
+		printerr("Tests failed. Example is not working...")
+		return
+	
+	#################
+	# prepare
+	var dir = Directory.new()
+	var file = File.new()
+	var test_dir = "res://testsuite/images/tests/"
+	#var locked_file = "locked.qoi"
+	var good_qoi = "good.qoi"
+	var broken_qoi = "broken.qoi"
+	var good_data = PoolByteArray()
+	var good_image : Image = load("res://icon.png").get_data()
+	var good_tex : ImageTexture = ImageTexture.new()
+	var bad_tex : ImageTexture = ImageTexture.new()
+	dir.make_dir_recursive(test_dir)
+	file.open(test_dir.plus_file(".gdignore"), File.WRITE)
+	file.close()
+	
+	qoi.write(test_dir.plus_file(good_qoi), good_image)
+	file.open(test_dir.plus_file(broken_qoi), File.WRITE)
+	file.store_buffer("definitely broken qoi data...".to_utf8())
+	file.close()
+	
+	file.open(test_dir.plus_file(good_qoi), File.READ)
+	good_data = file.get_buffer(file.get_len())
+	file.close()
+	good_tex.create_from_image(good_image)
+	
+	#################
+	### qoi_wrapper
+	
+	# read/decode
+	assert(!qoi.read(test_dir.plus_file("not existing file.qoi")), "Image must be empty when loading not existing file.")
+	assert(!qoi.read(test_dir.plus_file(broken_qoi)), "Image must be empty when loading broken qoi file.")
+	assert(!qoi.decode(PoolByteArray()), "Image must be empty when loading from empty array.")
+	assert(qoi.read(test_dir.plus_file(good_qoi)), "Image must be loaded correctly from correct qoi file.")
+	assert(qoi.decode(good_data), "Image must be loaded correctly from correct qoi data.")
+	
+	# write/encode
+	
+	assert(qoi.write("not matter", null) == ERR_INVALID_PARAMETER, "Write null Image can't be performed.")
+	assert(qoi.write("not matter", Image.new()) == ERR_INVALID_PARAMETER, "Write empty Image can't be performed.")
+	
+	assert(qoi.encode(null).size() == 0, "Encode null Image can't be performed.")
+	assert(qoi.encode(Image.new()).size() == 0, "Encode empty Image can't be performed.")
+	
+	var unsupported_image : Image = good_image.duplicate()
+# warning-ignore:return_value_discarded
+	unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, 0.5)
+	assert(qoi.write(test_dir.plus_file("unsupported format.qoi"), unsupported_image) != OK, "Write can't be performed with usupported Image format.")
+	
+	assert(qoi.encode(good_image).size() != 0, "Encode correct Image must be performed.")
+	
+	#################
+	### qoi_utils
+	var qoi_utils = preload("res://addons/qoi/editor/qoi_utils.gdns").new()
+	
+	assert(qoi_utils.save_resource("nope", bad_tex, 0) != OK, "Can't save bad texture")
+	var other_type_tex := NoiseTexture.new()
+	other_type_tex.noise = OpenSimplexNoise.new()
+	yield(get_tree(), "idle_frame")
+	assert(qoi_utils.save_resource(test_dir.plus_file("saved_tex.qoi"), other_type_tex, 0) == OK, "Correct texture must be saved")
+	
+	assert(!qoi_utils.load_resource(test_dir.plus_file(broken_qoi), test_dir.plus_file(broken_qoi)).get_data(), "Broken file can't be loaded")
+	assert(qoi_utils.load_resource(test_dir.plus_file("saved_tex.qoi"), test_dir.plus_file("saved_tex.qoi")), "Correct file must be loaded")
+	
+	# can't test everything :(
 
 func start_bench():
 	var result = {}
@@ -37,7 +115,7 @@ func start_bench():
 	for ext in ["png", "qoi"]:
 		result[ext] = []
 		
-		for i in test_runs:
+		for i in bench_runs:
 			var start_time = OS.get_ticks_usec()
 			fill_grid(dir, ext)
 			var time = OS.get_ticks_usec() - start_time
@@ -86,7 +164,7 @@ func start_bench():
 			print("Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG was imported as WebP inside .import folder")
 	
 	print("Platform: %s" % OS.get_name())
-	print("Avg for %d runs, with %dx%d %d frames" % [test_runs, image_width, image_height, frames_to_render])
+	print("Avg for %d runs, with %dx%d %d frames" % [bench_runs, image_width, image_height, frames_to_render])
 	for ext in ["png", "qoi"]:
 		var sum = 0
 		for t in result[ext]:

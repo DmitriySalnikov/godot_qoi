@@ -33,7 +33,7 @@ https://user-images.githubusercontent.com/7782218/152955097-285f81dc-2b65-4f80-b
 
 ## Download
 
-To download, use the [Godot Asset Library](https://godotengine.org/asset-library/asset/5159) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder.
+To download, use the [Godot Asset Library](https://godotengine.org/asset-library/asset/1226) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder.
 
 ## Editor integration
 

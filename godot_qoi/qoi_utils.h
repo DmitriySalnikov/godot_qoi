@@ -1,5 +1,6 @@
 #pragma once
 
+#include "qoi_shared.h"
 #include "qoi_wrapper.h"
 
 #include <Godot.hpp>
@@ -13,18 +14,6 @@ class QOIUtils : public Reference {
 
 private:
 	Ref<QOI> qoi_wrapper;
-
-	void _fake_set_prop_pba(PoolByteArray str){};
-	PoolByteArray _get_qoi_cfg_magic() { return get_qoi_magic(); };
-
-	void _fake_set_prop_str(String str){};
-	String _get_import_error() { return QOI_IMPORT_ERROR; };
-	String _get_import_flags() { return QOI_IMPORT_FLAGS; };
-	String _get_import_size_limits() { return QOI_IMPORT_SIZE_LIMIT; };
-	String _get_import_fix_alpha() { return QOI_IMPORT_FIX_ALPHA_BORDER; };
-	String _get_import_premult_alpha() { return QOI_IMPORT_PREMULT_ALPHA; };
-	String _get_import_invert_colors() { return QOI_IMPORT_INVERT_COLORS; };
-	String _get_import_normal_map_invert_y() { return QOI_IMPORT_NORMAL_MAP_INVERT_Y; };
 
 public:
 	static const char qoi_cfg_magic[4];
@@ -41,6 +30,7 @@ public:
 	void _init();
 
 	static PoolByteArray get_qoi_magic();
+
 	int add_footer(String target_path, Dictionary options, bool update = true);
 	Dictionary read_footer(String target_path);
 	void update_dictionary(Dictionary &data, const Dictionary updates);

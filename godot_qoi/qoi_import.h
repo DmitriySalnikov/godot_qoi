@@ -14,9 +14,9 @@ class QOIImport : public EditorImportPlugin {
 	Ref<QOI> qoi_wrapper;
 	Ref<QOIUtils> qoi_utils;
 
-public:
 	void _update_config_file(String path, Dictionary options);
 
+public:
 	static void _register_methods();
 	void _init();
 

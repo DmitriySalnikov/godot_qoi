@@ -17,16 +17,6 @@ const char *QOIUtils::QOI_IMPORT_NORMAL_MAP_INVERT_Y = "process/normal_map_inver
 void QOIUtils::_register_methods() {
 	register_method("save_resource", &QOIUtils::save_resource);
 	register_method("load_resource", &QOIUtils::load_resource);
-
-	register_property("QOI_CFG_MAGIC", &QOIUtils::_fake_set_prop_pba, &QOIUtils::_get_qoi_cfg_magic, get_qoi_magic());
-
-	register_property("QOI_IMPORT_ERROR", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_error, String(QOI_IMPORT_ERROR));
-	register_property("QOI_IMPORT_FLAGS", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_flags, String(QOI_IMPORT_FLAGS));
-	register_property("QOI_IMPORT_SIZE_LIMIT", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_size_limits, String(QOI_IMPORT_SIZE_LIMIT));
-	register_property("QOI_IMPORT_FIX_ALPHA_BORDER", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_fix_alpha, String(QOI_IMPORT_FIX_ALPHA_BORDER));
-	register_property("QOI_IMPORT_PREMULT_ALPHA", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_premult_alpha, String(QOI_IMPORT_PREMULT_ALPHA));
-	register_property("QOI_IMPORT_INVERT_COLORS", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_invert_colors, String(QOI_IMPORT_INVERT_COLORS));
-	register_property("QOI_IMPORT_NORMAL_MAP_INVERT_Y", &QOIUtils::_fake_set_prop_str, &QOIUtils::_get_import_normal_map_invert_y, String(QOI_IMPORT_NORMAL_MAP_INVERT_Y));
 }
 
 void QOIUtils::_init() {
@@ -53,7 +43,7 @@ int QOIUtils::add_footer(String target_path, Dictionary options, bool update) {
 	if (update) {
 		err = file->open(target_path, File::READ);
 		if ((int)err) {
-			Godot::print_error("Can't open QOI file in .import for reading", __FUNCTION__, __FILE__, __LINE__);
+			PRINT_ERROR("Can't open QOI file for reading: " + target_path);
 			return (int)err;
 		}
 
@@ -75,7 +65,7 @@ int QOIUtils::add_footer(String target_path, Dictionary options, bool update) {
 
 		err = file->open(target_path, file_content.size() > 0 ? File::WRITE : File::READ_WRITE);
 		if ((int)err) {
-			Godot::print_error("Can't open QOI file in .import for writing", __FUNCTION__, __FILE__, __LINE__);
+			PRINT_ERROR("Can't open QOI file for writing: " + target_path);
 			return (int)err;
 		}
 
@@ -84,7 +74,7 @@ int QOIUtils::add_footer(String target_path, Dictionary options, bool update) {
 
 			err = file->get_error();
 			if ((int)err) {
-				Godot::print_error("Can't rewrite QOI file without config", __FUNCTION__, __FILE__, __LINE__);
+				PRINT_ERROR("Can't rewrite QOI file without config: " + target_path);
 				file->close();
 				return (int)err;
 			}
@@ -92,7 +82,8 @@ int QOIUtils::add_footer(String target_path, Dictionary options, bool update) {
 	} else {
 		err = file->open(target_path, File::READ_WRITE);
 		if ((int)err) {
-			Godot::print_error("Can't open QOI file in .import for editing", __FUNCTION__, __FILE__, __LINE__);
+			PRINT_ERROR("Can't open QOI file for editing: " + target_path);
+			file->close();
 			return (int)err;
 		}
 	}
@@ -114,7 +105,7 @@ int QOIUtils::add_footer(String target_path, Dictionary options, bool update) {
 
 	err = file->get_error();
 	if ((int)err) {
-		Godot::print_error("Can't write config for QOI", __FUNCTION__, __FILE__, __LINE__);
+		PRINT_ERROR("Can't write config for QOI: " + target_path);
 		file->close();
 		return (int)err;
 	}
@@ -130,7 +121,7 @@ Dictionary QOIUtils::read_footer(String target_path) {
 
 	Error err = file->open(target_path, File::ModeFlags::READ);
 	if ((int)err) {
-		Godot::print_error("Can't open QOI config. Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
+		PRINT_ERROR("Can't open QOI config: " + target_path + ". Error: " + String::num_int64((int)err));
 		return result;
 	}
 
@@ -150,7 +141,7 @@ Dictionary QOIUtils::read_footer(String target_path) {
 		if (file->get_8() == 2) {
 			result[QOI_IMPORT_FLAGS] = (int)file->get_8();
 		} else {
-			Godot::print_error("Incorrect QOI config was found in the .import'ed file. Please reimport this file: " + target_path, __FUNCTION__, __FILE__, __LINE__);
+			PRINT_ERROR("Incorrect QOI config was found in the .import'ed file: " + target_path + ". Please reimport this file: " + target_path);
 			result[QOI_IMPORT_ERROR] = (int)Error::ERR_FILE_CORRUPT;
 		}
 	} else {
@@ -171,7 +162,7 @@ void QOIUtils::update_dictionary(Dictionary &data, const Dictionary updates) {
 int QOIUtils::save_resource(const String path, const Ref<Resource> resource, const int64_t flags) {
 	Ref<Texture> tex = resource;
 	if (tex.is_null()) {
-		Godot::print_error("Texture resource is null", __FUNCTION__, __FILE__, __LINE__);
+		PRINT_ERROR("Texture resource is null");
 		return (int)Error::ERR_INVALID_DATA;
 	}
 
@@ -184,21 +175,32 @@ int QOIUtils::save_resource(const String path, const Ref<Resource> resource, con
 	}
 
 	Ref<Image> img = tex->get_data();
+	Error err;
+
 	if (img.is_null() || img->is_empty()) {
-		Godot::print_error("Image resource is empty", __FUNCTION__, __FILE__, __LINE__);
+		PRINT_ERROR("Image resource is empty", __FUNCTION__, __REP_FILE__, __LINE__);
 		return (int)Error::ERR_INVALID_DATA;
 	}
 
-	Error err = (Error)qoi_wrapper->write(path, img);
+	if (img->is_compressed()) {
+		img = img->duplicate();
+		err = img->decompress();
+		if ((int)err) {
+			PRINT_ERROR("Can't decompress compressed image. Error: " + String::num_int64((int)err));
+			return (int)err;
+		}
+	}
+
+	err = (Error)qoi_wrapper->write(path, img);
 	if ((int)err) {
-		Godot::print_error("Can't save QOI image. Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
+		PRINT_ERROR("Can't save QOI image: " + path + ". Error: " + String::num_int64((int)err));
 		return (int)err;
 	}
 
 	err = (Error)add_footer(path, options, false);
 
 	if (tex->get_class() != "ImageTexture") {
-		Godot::print_warning("Please reload the project to properly import and update the newly created QOI file.", __FUNCTION__, __FILE__, __LINE__);
+		PRINT_WARNING("Please reload the project to properly import and update the newly created QOI file.");
 	}
 
 	return (int)err;
@@ -209,15 +211,14 @@ Ref<ImageTexture> QOIUtils::load_resource(const String path, const String origin
 	tex.instance();
 	int flags = Texture::Flags::FLAGS_DEFAULT;
 
-	// READ HERE
 	Dictionary footer = read_footer(path);
 	if (!footer.has(QOI_IMPORT_ERROR)) {
 		flags = (int)footer[QOI_IMPORT_FLAGS];
 	}
 
 	Ref<Image> q = qoi_wrapper->read(path);
-	if (q->is_empty()) {
-		Godot::print_error("The Image was not loaded correctly", __FUNCTION__, __FILE__, __LINE__);
+	if (q.is_null() || q->is_empty()) {
+		PRINT_ERROR("The Image was not loaded correctly");
 		return tex;
 	}
 

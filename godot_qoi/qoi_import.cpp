@@ -104,8 +104,8 @@ int64_t QOIImport::import(const String source_file, const String save_path, cons
 	Error err = Error::OK;
 	Ref<Image> image = qoi_wrapper->read(source_file);
 
-	if ((int)err) {
-		Godot::print_error("Can't open QOI image. Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
+	if (image.is_null() || image->is_empty()) {
+		PRINT_ERROR("Can't open QOI image: " + source_file);
 		return (int)err;
 	}
 
@@ -191,7 +191,7 @@ int64_t QOIImport::import(const String source_file, const String save_path, cons
 
 	err = (Error)qoi_wrapper->write(target_path, image);
 	if ((int)err) {
-		Godot::print_error("Can't save QOI in .import folder. Error: " + String::num_int64((int)err), __FUNCTION__, __FILE__, __LINE__);
+		PRINT_ERROR("Can't save QOI in .import folder: " + target_path + ". Error: " + String::num_int64((int)err));
 		return (int)err;
 	}
 

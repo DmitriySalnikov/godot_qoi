@@ -69,14 +69,13 @@ script = ExtResource( 3 )
 __meta__ = {
 "_edit_lock_": true
 }
-test_runs = 5
 
 [node name="Label" type="Label" parent="."]
-margin_left = 145.547
-margin_top = 131.111
-margin_right = 990.547
-margin_bottom = 424.111
-text = "Before starting this scene, please make sure that you have generated images by clicking \"Render\" in the parameters of the \"TestQOI\" node,
+margin_left = 146.0
+margin_top = 131.0
+margin_right = 1086.0
+margin_bottom = 424.0
+text = "Before starting this scene, please make sure that you have generated images by clicking \"Render Test Images\" in the parameters of the \"TestQOI\" node,
 after which these images should be imported (just switch to another window and back to Godot).
 To import .png as WebP or PNG, change the 'rendering/misc/lossless_compression/force_png' parameter in the project settings.
 To import PNG as VRAM compressed or lossy WebP, change the default preset for importing textures in the Import tab."

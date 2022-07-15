@@ -1,1 +1,0 @@
-scons platform=windows bits=64 target=release -j8

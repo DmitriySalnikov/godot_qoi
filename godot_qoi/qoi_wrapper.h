@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "qoi_shared.h"
 #include <Godot.hpp>
 #include <Image.hpp>
 #include <Reference.hpp>

@@ -121,6 +121,7 @@
     <ClInclude Include="godot_qoi\qoi.h" />
     <ClInclude Include="godot_qoi\qoi_import.h" />
     <ClInclude Include="godot_qoi\qoi_plugin.h" />
+    <ClInclude Include="godot_qoi\qoi_shared.h" />
     <ClInclude Include="godot_qoi\qoi_utils.h" />
     <ClInclude Include="godot_qoi\qoi_wrapper.h" />
     <ClInclude Include="godot_qoi\register_types.h" />

@@ -178,7 +178,7 @@ int QOIUtils::save_resource(const String path, const Ref<Resource> resource, con
 	Error err;
 
 	if (img.is_null() || img->is_empty()) {
-		PRINT_ERROR("Image resource is empty", __FUNCTION__, __REP_FILE__, __LINE__);
+		PRINT_ERROR("Image resource is empty");
 		return (int)Error::ERR_INVALID_DATA;
 	}
 

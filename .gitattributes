@@ -13,4 +13,5 @@
 /godot_qoi			export-ignore
 /godot-cpp			export-ignore
 /jni				export-ignore
+/patches			export-ignore
 /testsuite			export-ignore

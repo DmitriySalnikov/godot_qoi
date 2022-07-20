@@ -130,6 +130,9 @@
     <None Include="lib_utils.py" />
     <None Include="SConstruct" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="patches\GDNative.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

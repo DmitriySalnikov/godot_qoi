@@ -1,0 +1,75 @@
+diff --git a/include/core/String.hpp b/include/core/String.hpp
+index acee823..73ab66a 100644
+--- a/include/core/String.hpp
++++ b/include/core/String.hpp
+@@ -57,12 +57,19 @@ public:
+ 
+ class String {
+ 	godot_string _godot_string;
++#ifdef _DEBUG
++	const wchar_t *_debug_string;
++#endif //  _DEBUG
+ 
+ 	friend class Dictionary;
+ 	friend class NodePath;
+ 	friend class Variant;
+ 	explicit inline String(godot_string contents) :
+-			_godot_string(contents) {}
++			_godot_string(contents) {
++#ifdef _DEBUG
++		_debug_string = unicode_str();
++#endif //  _DEBUG
++	}
+ 
+ public:
+ 	String();
+diff --git a/src/core/String.cpp b/src/core/String.cpp
+index a7977ab..bf512a7 100644
+--- a/src/core/String.cpp
++++ b/src/core/String.cpp
+@@ -84,27 +84,45 @@ String String::hex_encode_buffer(const uint8_t *p_buffer, int p_len) {
+ 
+ godot::String::String() {
+ 	godot::api->godot_string_new(&_godot_string);
++#ifdef _DEBUG
++	_debug_string = unicode_str();
++#endif //  _DEBUG
+ }
+ 
+ String::String(const char *contents) {
+ 	godot::api->godot_string_new(&_godot_string);
+ 	godot::api->godot_string_parse_utf8(&_godot_string, contents);
++#ifdef _DEBUG
++	_debug_string = unicode_str();
++#endif //  _DEBUG
+ }
+ 
+ String::String(const wchar_t *contents) {
+ 	godot::api->godot_string_new_with_wide_string(&_godot_string, contents, wcslen(contents));
++#ifdef _DEBUG
++	_debug_string = unicode_str();
++#endif //  _DEBUG
+ }
+ 
+ String::String(const wchar_t c) {
+ 	godot::api->godot_string_new_with_wide_string(&_godot_string, &c, 1);
++#ifdef _DEBUG
++	_debug_string = unicode_str();
++#endif //  _DEBUG
+ }
+ 
+ String::String(const String &other) {
+ 	godot::api->godot_string_new_copy(&_godot_string, &other._godot_string);
++#ifdef _DEBUG
++	_debug_string = unicode_str();
++#endif //  _DEBUG
+ }
+ 
+ String::String(String &&other) {
+ 	godot::api->godot_string_new_copy(&_godot_string, &other._godot_string);
++#ifdef _DEBUG
++	_debug_string = unicode_str();
++#endif //  _DEBUG
+ }
+ 
+ String::~String() {

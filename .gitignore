@@ -35,3 +35,4 @@ obj/
 bin/
 /libs/
 testsuite/images/
+addons/qoi/libs/win/*.lib

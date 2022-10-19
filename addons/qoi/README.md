@@ -29,7 +29,7 @@ https://user-images.githubusercontent.com/7782218/152955097-285f81dc-2b65-4f80-b
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/dmitriysalnikov)
 
-[<img src="https://jobs.qiwi.com/assets/media/logo-mobile.83a2407e.svg" alt="qiwi" width=90px/>](https://qiwi.com/n/DMITRIYSALNIKOV)
+[<img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/QIWI_logo.svg" alt="qiwi" width=90px/>](https://qiwi.com/n/DMITRIYSALNIKOV)
 
 ## Download
 

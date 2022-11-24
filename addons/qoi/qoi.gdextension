@@ -1,0 +1,13 @@
+[configuration]
+
+entry_symbol = "godot_qoi_library_init"
+
+[libraries]
+
+macos.debug = "libs/macos/INSERT_NAME_HERE.framework"
+macos.release = "libs/macos/INSERT_NAME_HERE.framework"
+windows.debug.x86_64 = "libs/win/godot_qoi.windows.editor.x86_64.dll"
+windows.release.x86_64 = "libs/win/godot_qoi.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "libs/linux/INSERT_NAME_HERE.so"
+linux.release.x86_64 = "libs/linux/INSERT_NAME_HERE.so"
+# Repeat for other architectures to support arm64, rv64, etc.

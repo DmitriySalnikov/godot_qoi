@@ -1,81 +1,77 @@
 /* register_types.cpp */
 
-#include "register_types.h"
-#include <ConfigFile.hpp>
-#include <Directory.hpp>
-#include <EditorImportPlugin.hpp>
-#include <EditorPlugin.hpp>
-#include <File.hpp>
-#include <Godot.hpp>
-#include <ImageTexture.hpp>
-#include <ProjectSettings.hpp>
-#include <Resource.hpp>
-#include <ResourceFormatSaver.hpp>
-#include <ResourceImporter.hpp>
-#include <Texture.hpp>
-
-#ifndef NO_EDITOR
 #include "qoi_import.h"
-#include "qoi_plugin.h"
-#endif
-#include "qoi_utils.h"
+#include "qoi_save.h"
 #include "qoi_wrapper.h"
+
+#include "qoi_shared.h"
+
+#include <godot_cpp/classes/project_settings.hpp>
 
 using namespace godot;
 
+Ref<QOIImport> qoi_import_plugin;
+Ref<QOIResourceSaver> qoi_resource_saver;
+
 /** GDNative Initialize **/
-extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o) {
-	Godot::gdnative_init(o);
+extern "C" void GDN_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
+	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+		return;
+	}
 
-	// Custom register and init for only needed classes
-	// Works only with my patches
-	godot::_TagDB::register_global_type("Image", typeid(Image).hash_code(), typeid(Resource).hash_code());
-	godot::_TagDB::register_global_type("Object", typeid(Object).hash_code(), 0);
-	godot::_TagDB::register_global_type("Resource", typeid(Resource).hash_code(), typeid(Reference).hash_code());
-	godot::_TagDB::register_global_type("ProjectSettings", typeid(ProjectSettings).hash_code(), typeid(Object).hash_code());
-	godot::_TagDB::register_global_type("EditorPlugin", typeid(EditorPlugin).hash_code(), typeid(Node).hash_code());
-	godot::_TagDB::register_global_type("ResourceImporter", typeid(ResourceImporter).hash_code(), typeid(Reference).hash_code());
-	godot::_TagDB::register_global_type("EditorImportPlugin", typeid(EditorImportPlugin).hash_code(), typeid(ResourceImporter).hash_code());
-	godot::_TagDB::register_global_type("ConfigFile", typeid(ConfigFile).hash_code(), typeid(Reference).hash_code());
-	godot::_TagDB::register_global_type("Reference", typeid(Reference).hash_code(), typeid(Object).hash_code());
-	godot::_TagDB::register_global_type("Texture", typeid(Texture).hash_code(), typeid(Resource).hash_code());
-	godot::_TagDB::register_global_type("ImageTexture", typeid(ImageTexture).hash_code(), typeid(Texture).hash_code());
-	godot::_TagDB::register_global_type("_Directory", typeid(Directory).hash_code(), typeid(Reference).hash_code());
-	godot::_TagDB::register_global_type("_File", typeid(File).hash_code(), typeid(Reference).hash_code());
+	ClassDB::register_class<QOI>();
+	ClassDB::register_class<QOIImport>();
+	ClassDB::register_class<QOIResourceSaver>();
 
-	Image::___init_method_bindings();
-	Object::___init_method_bindings();
-	Resource::___init_method_bindings();
-	ProjectSettings::___init_method_bindings();
-	EditorPlugin::___init_method_bindings();
-	ResourceImporter::___init_method_bindings();
-	EditorImportPlugin::___init_method_bindings();
-	ConfigFile::___init_method_bindings();
-	Reference::___init_method_bindings();
-	Texture::___init_method_bindings();
-	ImageTexture::___init_method_bindings();
-	Directory::___init_method_bindings();
-	File::___init_method_bindings();
+	ProjectSettings *ps = ProjectSettings::get_singleton();
+
+#define DEFINE_SETTING_AND_GET(var, path, def, type) \
+	{                                                \
+		if (!ps->has_setting(path)) {                \
+			ps->set_setting(path, def);              \
+		}                                            \
+		Dictionary info;                             \
+		info["name"] = path;                         \
+		info["type"] = type;                         \
+		ps->add_property_info(info);                 \
+		ps->set_initial_value(path, def);            \
+	}                                                \
+	var = ps->get_setting(path)
+
+	DEFINE_SETTING_AND_GET(bool importer_enabled, "rendering/textures/qoi/enable_qoi_importer", true, Variant::BOOL);
+	DEFINE_SETTING_AND_GET(bool saver_enabled, "rendering/textures/qoi/enable_qoi_saver", true, Variant::BOOL);
+
+	if (importer_enabled) {
+		qoi_import_plugin.instantiate();
+		qoi_import_plugin->add_format_loader();
+	}
+
+	if (saver_enabled) {
+		qoi_resource_saver.instantiate();
+		ResourceSaver::get_singleton()->add_resource_format_saver(qoi_resource_saver, false);
+	}
 }
 
-/** GDNative Terminate **/
-extern "C" void GDN_EXPORT godot_gdnative_terminate(godot_gdnative_terminate_options *o) {
-	Godot::gdnative_terminate(o);
+/** GDNative Uninitialize **/
+extern "C" void GDN_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLevel p_level) {
+	if (qoi_import_plugin.is_valid())
+		qoi_import_plugin->remove_format_loader();
+	qoi_import_plugin.unref();
+
+	if (qoi_resource_saver.is_valid())
+		ResourceSaver::get_singleton()->remove_resource_format_saver(qoi_resource_saver);
+	qoi_resource_saver.unref();
 }
 
-/** GDNative Singleton **/
-extern "C" void GDN_EXPORT godot_gdnative_singleton() {
+/** GDNative Initialize **/
+extern "C" {
+GDNativeBool GDN_EXPORT godot_qoi_library_init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
+	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
+
+	init_obj.register_initializer(initialize_godot_qoi_module);
+	init_obj.register_terminator(uninitialize_godot_qoi_module);
+	init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
+
+	return init_obj.init();
 }
-
-/** NativeScript Initialize **/
-extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
-	Godot::nativescript_init(handle);
-
-	register_tool_class<QOI>();
-	register_tool_class<QOIUtils>();
-
-#ifndef NO_EDITOR
-	register_tool_class<QOIPlugin>();
-	register_tool_class<QOIImport>();
-#endif
 }

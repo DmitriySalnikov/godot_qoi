@@ -1,8 +1,4 @@
-/* qoi_wrapper.cpp */
-
 #include "qoi_wrapper.h"
-#include <Directory.hpp>
-#include <File.hpp>
 
 #define QOI_NO_STDIO
 #define QOI_IMPLEMENTATION
@@ -11,106 +7,85 @@
 
 using namespace godot;
 
-#define QOI_PRINT_ERROR(text) print_error(text, __FUNCTION__, get_file_name_in_repository(__FILE__), __LINE__)
-
-void QOI::print_error(String error, String func, String file, int line) {
-	if (print_errors)
-		Godot::print_error(error, func, file, line);
-}
-
-void QOI::_register_methods() {
-	register_method("write", &QOI::write);
-	register_method("encode", &QOI::encode);
-	register_method("read", &QOI::read);
-	register_method("decode", &QOI::decode);
-	register_property("print_errors", &QOI::print_errors, true);
+void QOI::_bind_methods() {
+	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(write), "path", "image"), &QOI::write);
+	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(encode), "image"), &QOI::encode);
+	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(read), "path"), &QOI::read);
+	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(decode), "data"), &QOI::decode);
 }
 
 Ref<Image> QOI::read(String path) {
-	Ref<File> f;
-	f.instance();
+	ERR_FAIL_COND_V_MSG(!FileAccess::file_exists(path), Ref<Image>(), "File does not exist: " + path);
 
-	if (!f->file_exists(path)) {
-		QOI_PRINT_ERROR("File does not exist: " + path);
-		return Ref<Image>();
-	}
+	Ref<FileAccess> f = FileAccess::open(path, FileAccess::READ);
+	ERR_FAIL_COND_V_MSG(f.is_null(), Ref<Image>(), "Could not open the file for reading: " + path + ". Error: " + String::num_int64((int)FileAccess::get_open_error()));
 
-	auto err = f->open(path, File::ModeFlags::READ);
-	if (err != Error::OK) {
-		QOI_PRINT_ERROR("Could not open the file for reading: " + path + ". Error: " + String::num_int64((int)err));
-		return Ref<Image>();
-	}
+	PackedByteArray data = f->get_buffer(f->get_length());
+	ERR_FAIL_COND_V_MSG(f->get_error() != Error::OK, Ref<Image>(), "Failed to write data to file " + path + ". Error: " + String::num_int64((int)f->get_error()));
+	f.unref();
 
-	PoolByteArray data = f->get_buffer(f->get_len());
-	f->close();
 	return decode(data);
 }
 
-Ref<Image> QOI::decode(PoolByteArray data) {
-	if (data.size() == 0) {
-		QOI_PRINT_ERROR("Image data cannot be empty");
-		return Ref<Image>();
-	}
-
-	qoi_desc dec;
-	void *out;
-
-	out = qoi_decode(data.read().ptr(), data.size(), &dec, 0);
-	if (out == NULL) {
-		QOI_PRINT_ERROR("Unable to decode data");
-		return Ref<Image>();
-	}
-
-	PoolByteArray img_data;
-
-	img_data.resize(dec.channels * dec.width * dec.height);
-
-	memcpy(img_data.write().ptr(), out, img_data.size());
-	::free(out);
+Ref<Image> QOI::decode(const PackedByteArray &data) {
+	ERR_FAIL_COND_V_MSG(data.size() == 0, Ref<Image>(), "Image data cannot be empty");
 
 	Ref<Image> img;
-	img.instance();
-	img->create_from_data(dec.width, dec.height, false, dec.channels == 3 ? Image::Format::FORMAT_RGB8 : Image::Format::FORMAT_RGBA8, img_data);
+	img.instantiate();
+
+	if (decode_to_image(data, img) != Error::OK)
+		return Ref<Image>();
 
 	return img;
 }
 
-int QOI::write(String path, Ref<Image> img) {
-	if (img.is_null() || img->is_empty()) {
-		QOI_PRINT_ERROR("Image cannot be null or empty");
-		return (int)Error::ERR_INVALID_PARAMETER;
+int QOI::decode_to_image(const PackedByteArray &data, const Ref<Image> &out_image) {
+	qoi_desc desc;
+	void *out;
+
+	out = qoi_decode(data.ptr(), (int)data.size(), &desc, 0);
+	ERR_FAIL_COND_V_MSG(out == NULL, ERR_FILE_CORRUPT, "Unable to decode data");
+
+	PackedByteArray img_data;
+
+	int64_t size = desc.channels * desc.width * desc.height;
+	img_data.resize(size);
+
+	if (img_data.size() != size) {
+		::free(out);
+		ERR_FAIL_V_MSG(ERR_OUT_OF_MEMORY, "Unable to resize PackedByteArray");
 	}
 
-	auto b = encode(img);
-	if (b.size() == 0)
-		return (int)Error::FAILED;
+	memcpy(img_data.ptrw(), out, size);
+	::free(out);
 
-	Ref<File> f;
-	f.instance();
-	auto err = f->open(path, File::ModeFlags::WRITE);
-
-	if (err != Error::OK) {
-		QOI_PRINT_ERROR("Could not open the file for writing: " + path + ". Error: " + String::num_int64((int)err));
-		return (int)err;
-	}
-
-	f->store_buffer(b);
-	err = f->get_error();
-	f->close();
-
-	if (err != Error::OK) {
-		QOI_PRINT_ERROR("Failed to write data to file " + path + ". Error: " + String::num_int64((int)err));
-		return (int)err;
-	}
-
-	return (int)Error::OK;
+	const_cast<Image *>(out_image.ptr())->set_data(desc.width, desc.height, false, desc.channels == 3 ? Image::Format::FORMAT_RGB8 : Image::Format::FORMAT_RGBA8, img_data);
+	return Error::OK;
 }
 
-PoolByteArray QOI::encode(Ref<Image> img) {
-	if (img.is_null() || img->is_empty()) {
-		QOI_PRINT_ERROR("Image cannot be null or empty");
-		return PoolByteArray();
-	}
+int QOI::write(String path, Ref<Image> img) {
+	ERR_FAIL_COND_V_MSG(img.is_null(), Error::ERR_INVALID_PARAMETER, "Image cannot be null");
+	ERR_FAIL_COND_V_MSG(img->is_empty(), Error::ERR_INVALID_PARAMETER, "Image cannot be empty");
+
+	PackedByteArray b = encode(img);
+	ERR_FAIL_COND_V_MSG(b.size() == 0, Error::FAILED, "Image cannot be null or empty");
+
+	Ref<FileAccess> f = FileAccess::open(path, FileAccess::WRITE);
+
+	ERR_FAIL_COND_V_MSG(f.is_null(), FileAccess::get_open_error(), "Could not open the file for writing: " + path + ". Error: " + String::num_int64((int)FileAccess::get_open_error()));
+
+	f->store_buffer(b);
+	auto err = f->get_error();
+	f.unref();
+
+	ERR_FAIL_COND_V_MSG(err != Error::OK, f->get_error(), "Failed to write data to file " + path + ". Error: " + String::num_int64((int)err));
+
+	return Error::OK;
+}
+
+PackedByteArray QOI::encode(Ref<Image> img) {
+	ERR_FAIL_COND_V_MSG(img.is_null(), PackedByteArray(), "Image cannot be null");
+	ERR_FAIL_COND_V_MSG(img->is_empty(), PackedByteArray(), "Image cannot be empty");
 
 	bool has_alpha = img->detect_alpha();
 
@@ -118,10 +93,7 @@ PoolByteArray QOI::encode(Ref<Image> img) {
 		// try to convert
 		img->convert(has_alpha ? Image::Format::FORMAT_RGBA8 : Image::Format::FORMAT_RGB8);
 
-		if (img->get_format() != Image::Format::FORMAT_RGB8 && img->get_format() != Image::Format::FORMAT_RGBA8) {
-			QOI_PRINT_ERROR("Unsupported image format");
-			return PoolByteArray();
-		}
+		ERR_FAIL_COND_V_MSG(img->get_format() != Image::FORMAT_RGB8 && img->get_format() != Image::FORMAT_RGBA8, PackedByteArray(), "Unsupported image format");
 	} else {
 		img->convert(has_alpha ? Image::Format::FORMAT_RGBA8 : Image::Format::FORMAT_RGB8);
 	}
@@ -136,28 +108,18 @@ PoolByteArray QOI::encode(Ref<Image> img) {
 	int len = 0;
 	void *out;
 
-	img->lock();
-	out = qoi_encode(img->get_data().read().ptr(), &enc, &len);
-	if (out == NULL) {
-		QOI_PRINT_ERROR("Unable to encode the image");
-		return PoolByteArray();
-	}
-	img->unlock();
+	out = qoi_encode(img->get_data().ptr(), &enc, &len);
+	ERR_FAIL_COND_V_MSG(out == NULL, PackedByteArray(), "Unable to encode the image");
 
-	PoolByteArray res;
+	PackedByteArray res;
 	res.resize(len);
 	if (res.size() != len) {
 		::free(out);
-		QOI_PRINT_ERROR("Unable to resize PoolByteArray");
-		return PoolByteArray();
+		ERR_FAIL_V_MSG(PackedByteArray(), "Unable to resize PackedByteArray");
 	}
 
-	memcpy(res.write().ptr(), out, len);
+	memcpy(res.ptrw(), out, len);
 	::free(out);
 
 	return res;
-}
-
-void QOI::_init() {
-	// initialize any variables here
 }

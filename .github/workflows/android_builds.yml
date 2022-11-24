@@ -10,8 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  android-gdnative:
-    name: GDNative
+  android-gdextension:
+    name: GDExtension
     runs-on: "ubuntu-latest"
 
     steps:
@@ -37,13 +37,13 @@ jobs:
       - name: Compile godot-cpp
         run: |
           cd godot-cpp
-          git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
+          # git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
           scons platform=android android_arch=armv7 target=release generate_bindings=yes -j3
           scons platform=android android_arch=arm64v8 target=release -j3
           scons platform=android android_arch=x86 target=release -j3
           scons platform=android android_arch=x86_64 target=release -j3
 
-      - name: Compile GDNative
+      - name: Compile GDExtension
         run: |
           $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk  APP_PLATFORM=android-21 -j2
 

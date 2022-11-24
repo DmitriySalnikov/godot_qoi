@@ -1,4 +1,4 @@
-name: 2. ↗️ Update GDNative binaries from collected artifacts
+name: 2. ↗️ Update GDExtension binaries from collected artifacts
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   update:
-    name: Update GDNative binaries
+    name: Update GDExtension binaries
     runs-on: ubuntu-latest
 
     steps:
@@ -15,19 +15,19 @@ jobs:
         with:
           lfs: true
       
-      - name: Download GDNative Binaries
+      - name: Download GDExtension Binaries
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: util_collect_binaries.yml
           branch: ${{ github.ref_name }}
-          name: gdnative_libs
+          name: gdextension_libs
           path: extracted_files/
 
       - name: Replace with new files
         run: |
           ls extracted_files/*
-          rm -rf addons/qoi/libs/
-          mv -f extracted_files addons/qoi/libs
+          rm -rf addons/jolt/libs/
+          mv -f extracted_files addons/jolt/libs
 
       - name: Commit report
         run: |

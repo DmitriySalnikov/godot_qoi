@@ -1,33 +1,24 @@
 #pragma once
 
-#include "qoi_utils.h"
-#include "qoi_wrapper.h"
+#if defined(_MSC_VER)
+#pragma warning(disable : 4244)
+#endif
 
-#include <EditorImportPlugin.hpp>
-#include <Godot.hpp>
+#include <godot_cpp/classes/image_format_loader_extension.hpp>
+
+#if defined(_MSC_VER)
+#pragma warning(default : 4244)
+#endif
 
 using namespace godot;
 
-class QOIImport : public EditorImportPlugin {
-	GODOT_CLASS(QOIImport, EditorImportPlugin)
+class QOIImport : public ImageFormatLoaderExtension {
+	GDCLASS(QOIImport, ImageFormatLoaderExtension)
 
-	Ref<QOI> qoi_wrapper;
-	Ref<QOIUtils> qoi_utils;
-
-	void _update_config_file(String path, Dictionary options);
+protected:
+	static void _bind_methods(){};
 
 public:
-	static void _register_methods();
-	void _init();
-
-	String get_importer_name();
-	String get_visible_name();
-	Array get_recognized_extensions();
-	String get_save_extension();
-	String get_resource_type();
-	int64_t get_preset_count();
-	String get_preset_name(const int64_t preset);
-	Array get_import_options(const int64_t preset);
-	bool get_option_visibility(const String option, const Dictionary options);
-	int64_t import(const String source_file, const String save_path, const Dictionary options, const Array platform_variants, const Array gen_files);
+	virtual PackedStringArray _get_recognized_extensions() const override;
+	virtual Error _load_image(const Ref<Image> &image, const Ref<FileAccess> &fileaccess, BitField<ImageFormatLoader::LoaderFlags> flags, double scale) override;
 };

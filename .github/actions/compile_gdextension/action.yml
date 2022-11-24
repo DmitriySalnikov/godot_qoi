@@ -1,5 +1,5 @@
-name: Build GDNative
-description: Build GDNative library
+name: Build GDExtension
+description: Build GDExtension library
 inputs:
   platform:
     description: Target platform
@@ -45,10 +45,10 @@ runs:
       shell: bash
       run: |
         cd godot-cpp
-        git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
-        scons platform=${{ inputs.platform }} ${{ inputs.bits }} target=${{ inputs.target }} generate_bindings=yes -j4
+        # git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
+        scons platform=${{ inputs.platform }} ${{ inputs.bits }} target=${{ inputs.target }} generate_bindings=yes
         cd ..
-        scons platform=${{ inputs.platform }} ${{ inputs.bits }} target=${{ inputs.target }} -j4
+        scons platform=${{ inputs.platform }} ${{ inputs.bits }} target=${{ inputs.target }}
 
     - name: Prepare artifact Unix
       if: runner.os != 'Windows'

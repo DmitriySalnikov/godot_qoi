@@ -1,28 +1,19 @@
-/* qoi_wrapper.h */
-
 #pragma once
 
 #include "qoi_shared.h"
-#include <Godot.hpp>
-#include <Image.hpp>
-#include <Reference.hpp>
 
 using namespace godot;
 
-class QOI : public Reference {
-	GODOT_CLASS(QOI, Reference)
+class QOI : public RefCounted {
+	GDCLASS(QOI, RefCounted)
 
-private:
-	void print_error(String error, String func, String file, int line);
+protected:
+	static void _bind_methods();
 
 public:
-	static void _register_methods();
-	void _init();
-
-	bool print_errors = true;
-
-	Ref<Image> read(String path);
-	Ref<Image> decode(PoolByteArray data);
-	int write(String path, Ref<Image> img);
-	PoolByteArray encode(Ref<Image> img);
+	static Ref<Image> read(String path);
+	static Ref<Image> decode(const PackedByteArray &data);
+	static int decode_to_image(const PackedByteArray &data, const Ref<Image> &out_image);
+	static int write(String path, Ref<Image> img);
+	static PackedByteArray encode(Ref<Image> img);
 };

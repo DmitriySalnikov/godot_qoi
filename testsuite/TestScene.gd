@@ -1,36 +1,37 @@
-tool
+@tool
 extends Control
 
 const img_dir = "res://testsuite/images/"
-export var run_tests = false
-export var run_benchmark = true
-export(int, 0, 256) var bench_runs = 5
-export(int, 1, 256) var frames_to_render = 99
-export(int, 1, 8192) var image_width = 1920
-export(int, 1, 8192) var image_height = 1080
-export var render_test_images : bool = false setget set_render
+@export var run_tests = false
+@export var run_benchmark = true
+@export_range(0, 256) var bench_runs := 5
+@export_range(1, 256) var frames_to_render := 99
+@export_range(1, 8192) var image_width := 1920
+@export_range(1, 8192) var image_height := 1080
+@export var render_test_images : bool = false:
+	set = set_render
 
-onready var grid := $GridContainer
+@export var image_to_test_save := Image.create_from_data(1, 1, false,Image.FORMAT_RGB8, [128, 1, 1])
+@export var tex_to_test_save := ImageTexture.create_from_image(Image.create_from_data(1, 1, false, Image.FORMAT_RGB8, [1, 128, 1]))
+
+@onready var grid := $GridContainer
 
 func _ready() -> void:
-	if not Engine.editor_hint:
+	if not Engine.is_editor_hint():
 		$ViewportContainer.queue_free()
 		test_api()
 		if run_benchmark:
-			yield(get_tree(), "idle_frame")
+			await get_tree().process_frame
 			start_bench()
 
 func test_api():
-	var qoi = load("res://addons/qoi/qoi.gdns").new()
-	qoi.print_errors = true
+	@warning_ignore(return_value_discarded)
+	QOI.write("user://example.qoi", load("res://icon.svg").get_image())
+	var img = QOI.read("user://example.qoi")
+	var enc = QOI.encode(img)
+	var dec = QOI.decode(enc)
 	
-	qoi.write("user://example.qoi", load("res://icon.png").get_data())
-	var img = qoi.read("user://example.qoi")
-	var enc = qoi.encode(img)
-	var dec = qoi.decode(enc)
-	
-	var tex: = ImageTexture.new()
-	tex.create_from_image(dec)
+	var tex: = ImageTexture.create_from_image(dec)
 	$TextureRect.texture = tex
 	
 	# More tests
@@ -38,98 +39,99 @@ func test_api():
 	if !run_tests:
 		return
 	
-	if tex.get_data().is_empty():
+	if tex.get_image().is_empty():
 		printerr("Tests failed. Example is not working...")
 		return
 	
 	#################
 	# prepare
-	var dir = Directory.new()
-	var file = File.new()
 	var test_dir = "res://testsuite/images/tests/"
 	#var locked_file = "locked.qoi"
 	var good_qoi = "good.qoi"
 	var broken_qoi = "broken.qoi"
-	var good_data = PoolByteArray()
-	var good_image : Image = load("res://icon.png").get_data()
+	var good_data = PackedByteArray()
+	var good_image : Image = load("res://icon.svg").get_image()
 	var good_tex : ImageTexture = ImageTexture.new()
-	var bad_tex : ImageTexture = ImageTexture.new()
-	dir.make_dir_recursive(test_dir)
-	file.open(test_dir.plus_file(".gdignore"), File.WRITE)
-	file.close()
 	
-	qoi.write(test_dir.plus_file(good_qoi), good_image)
-	file.open(test_dir.plus_file(broken_qoi), File.WRITE)
-	file.store_buffer("definitely broken qoi data...".to_utf8())
-	file.close()
+	@warning_ignore(return_value_discarded)
+	var files_to_delete = DirAccess.get_files_at(test_dir)
+	for f in files_to_delete:
+		@warning_ignore(return_value_discarded)
+		DirAccess.remove_absolute(test_dir.path_join(f))
 	
-	file.open(test_dir.plus_file(good_qoi), File.READ)
-	good_data = file.get_buffer(file.get_len())
-	file.close()
-	good_tex.create_from_image(good_image)
+	@warning_ignore(return_value_discarded)
+	DirAccess.make_dir_recursive_absolute(test_dir)
+	var file = FileAccess.open(test_dir.path_join(".gdignore"), FileAccess.WRITE)
+	file = null
+	
+	@warning_ignore(return_value_discarded)
+	QOI.write(test_dir.path_join(good_qoi), good_image)
+	file = FileAccess.open(test_dir.path_join(broken_qoi), FileAccess.WRITE)
+	file.store_buffer("definitely broken qoi data...".to_utf8_buffer())
+	file = null
+	
+	file = FileAccess.open(test_dir.path_join(good_qoi), FileAccess.READ)
+	good_data = file.get_buffer(file.get_length())
+	file = null
+	good_tex.set_image(good_image)
 	
 	#################
 	### qoi_wrapper
 	
 	# read/decode
-	assert(!qoi.read(test_dir.plus_file("not existing file.qoi")), "Image must be empty when loading not existing file.")
-	assert(!qoi.read(test_dir.plus_file(broken_qoi)), "Image must be empty when loading broken qoi file.")
-	assert(!qoi.decode(PoolByteArray()), "Image must be empty when loading from empty array.")
-	assert(qoi.read(test_dir.plus_file(good_qoi)), "Image must be loaded correctly from correct qoi file.")
-	assert(qoi.decode(good_data), "Image must be loaded correctly from correct qoi data.")
+	assert(!QOI.read(test_dir.path_join("not existing file.qoi")), "Image must be empty when loading not existing file.")
+	assert(!QOI.read(test_dir.path_join(broken_qoi)), "Image must be empty when loading broken qoi file.")
+	assert(!QOI.decode(PackedByteArray()), "Image must be empty when loading from empty array.")
+	assert(QOI.read(test_dir.path_join(good_qoi)), "Image must be loaded correctly from correct qoi file.")
+	assert(QOI.decode(good_data), "Image must be loaded correctly from correct qoi data.")
 	
 	# write/encode
 	
-	assert(qoi.write("not matter", null) == ERR_INVALID_PARAMETER, "Write null Image can't be performed.")
-	assert(qoi.write("not matter", Image.new()) == ERR_INVALID_PARAMETER, "Write empty Image can't be performed.")
+	assert(QOI.write("not matter", null) == ERR_INVALID_PARAMETER, "Write null Image can't be performed.")
+	assert(QOI.write("not matter", Image.new()) == ERR_INVALID_PARAMETER, "Write empty Image can't be performed.")
 	
-	assert(qoi.encode(null).size() == 0, "Encode null Image can't be performed.")
-	assert(qoi.encode(Image.new()).size() == 0, "Encode empty Image can't be performed.")
+	assert(QOI.encode(null).size() == 0, "Encode null Image can't be performed.")
+	assert(QOI.encode(Image.new()).size() == 0, "Encode empty Image can't be performed.")
 	
 	var unsupported_image : Image = good_image.duplicate()
-# warning-ignore:return_value_discarded
+	@warning_ignore(return_value_discarded)
 	unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, 0.5)
-	assert(qoi.write(test_dir.plus_file("unsupported format.qoi"), unsupported_image) != OK, "Write can't be performed with usupported Image format.")
+	assert(QOI.write(test_dir.path_join("unsupported format.qoi"), unsupported_image) != OK, "Write can't be performed with usupported Image format.")
 	
-	assert(qoi.encode(good_image).size() != 0, "Encode correct Image must be performed.")
+	assert(QOI.encode(good_image).size() != 0, "Encode correct Image must be performed.")
 	
 	#################
-	### qoi_utils
-	var qoi_utils = preload("res://addons/qoi/editor/qoi_utils.gdns").new()
+	### qoi_save
 	
-	assert(qoi_utils.save_resource("nope", bad_tex, 0) != OK, "Can't save bad texture")
-	var other_type_tex := NoiseTexture.new()
-	other_type_tex.noise = OpenSimplexNoise.new()
-	yield(get_tree(), "idle_frame")
-	assert(qoi_utils.save_resource(test_dir.plus_file("saved_tex.qoi"), other_type_tex, 0) == OK, "Correct texture must be saved")
-	
-	assert(!qoi_utils.load_resource(test_dir.plus_file(broken_qoi), test_dir.plus_file(broken_qoi)).get_data(), "Broken file can't be loaded")
-	assert(qoi_utils.load_resource(test_dir.plus_file("saved_tex.qoi"), test_dir.plus_file("saved_tex.qoi")), "Correct file must be loaded")
-	
-	# can't test everything :(
+	@warning_ignore(return_value_discarded)
+	ResourceSaver.save(image_to_test_save, test_dir.path_join("1x1_img.qoi"))
+	@warning_ignore(return_value_discarded)
+	ResourceSaver.save(tex_to_test_save, test_dir.path_join("1x1_tex.qoi"))
+	assert(QOI.read(test_dir.path_join("1x1_img.qoi")), "Image must be saved to QOI via ResourceSaver and loaded correctly.")
+	assert(QOI.read(test_dir.path_join("1x1_tex.qoi")), "Texture must be saved to QOI via ResourceSaver and loaded correctly.")
 
 func start_bench():
 	var result = {}
-	var dir = img_dir.plus_file("%dx%d_%d" % [image_width, image_height, frames_to_render])
+	var dir = img_dir.path_join("%dx%d_%d" % [image_width, image_height, frames_to_render])
 	
 	for ext in ["png", "qoi"]:
 		result[ext] = []
 		
 		for i in bench_runs:
-			var start_time = OS.get_ticks_usec()
+			var start_time = Time.get_ticks_usec()
 			fill_grid(dir, ext)
-			var time = OS.get_ticks_usec() - start_time
+			var time = Time.get_ticks_usec() - start_time
 			result[ext].append(time)
 			print("Run: %d, Ext: %s, %.3f ms" % [i, ext, time / 1000.0])
 			
 			# show images for 1 frame
-			yield(get_tree(), "idle_frame")
+			await get_tree().process_frame
 			# Clear
 			var ch = grid.get_children()
 			for c in ch:
 				c.queue_free()
-			# wait 1 more frame to make sure the resources have been released
-			yield(get_tree(), "idle_frame")
+			# wait 1 sec to make sure the resources have been released
+			await get_tree().create_timer(1).timeout
 	
 	# textures can be imported as png or webp or as vram compressed
 	var is_vram = false
@@ -137,9 +139,8 @@ func start_bench():
 	if ProjectSettings.has_setting("importer_defaults/texture"):
 		is_vram = ProjectSettings.get_setting("importer_defaults/texture")["compress/mode"] == 2
 		if is_vram:
-			var _file := File.new()
-			if _file.file_exists(dir.plus_file("0.png")):
-				var f = load(dir.plus_file("0.png")).get_data().get_format()
+			if FileAccess.file_exists(dir.path_join("0.png")):
+				var f = load(dir.path_join("0.png")).get_data().get_format()
 				vram_format = f
 				
 				if f in [Image.FORMAT_DXT1, Image.FORMAT_DXT3, Image.FORMAT_DXT5]:
@@ -147,7 +148,7 @@ func start_bench():
 				elif f in [Image.FORMAT_BPTC_RGBA, Image.FORMAT_BPTC_RGBF, Image.FORMAT_BPTC_RGBFU]:
 					vram_format = "bptc"
 				elif OS.has_feature("Android"):
-					vram_format = "etc" if OS.get_current_video_driver() == OS.VIDEO_DRIVER_GLES2 else "etc2"
+					vram_format = "etc2"
 				elif OS.has_feature("iOS"):
 					vram_format = "pvrtc"
 	
@@ -173,27 +174,36 @@ func start_bench():
 		print("%s:\t%.3f ms" % [e, (sum / float(result[ext].size())) / 1000.0])
 
 func render_images():
-	var dir = Directory.new()
-	var fin_dir = img_dir.plus_file("%dx%d_%d" % [image_width, image_height, frames_to_render])
-	dir.make_dir_recursive(fin_dir)
+	var fin_dir = img_dir.path_join("%dx%d_%d" % [image_width, image_height, frames_to_render])
+	@warning_ignore(return_value_discarded)
+	DirAccess.make_dir_recursive_absolute(fin_dir)
 	
 	$ViewportContainer/Viewport.size = Vector2(image_width, image_height)
-	$ViewportContainer/Viewport/AnimationPlayer.stop()
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
+	$ViewportContainer/Viewport/TextureRect.size = Vector2(image_width, image_height)
 	
-	var tex = $ViewportContainer/Viewport.get_texture()
+	$ViewportContainer/Viewport/AnimationPlayer.stop()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	var tex : ViewportTexture = $ViewportContainer/Viewport.get_texture()
 	$ViewportContainer/Viewport/AnimationPlayer.play("Noise")
 	
-	var qoi = preload("res://addons/qoi/qoi.gdns").new()
+	print("Hold ESC to cancel rendering")
 	for i in frames_to_render:
 		# save png and qoi for tests
 		var format = "%d.%s"
-		tex.get_data().save_png(fin_dir.plus_file(format % [i, "png"]))
-		qoi.write(fin_dir.plus_file(format % [i, "qoi"]), tex.get_data())
-		yield(get_tree(), "idle_frame")
+		@warning_ignore(return_value_discarded)
+		tex.get_image().save_png(fin_dir.path_join(format % [i, "png"]))
+		@warning_ignore(return_value_discarded)
+		QOI.write(fin_dir.path_join(format % [i, "qoi"]), tex.get_image())
+		await get_tree().process_frame
+		print("%d/%d" % [i+1, frames_to_render])
+		
+		if Input.is_key_pressed(KEY_ESCAPE):
+			break
 	
 	$ViewportContainer/Viewport.size = Vector2(128, 128)
+	$ViewportContainer/Viewport/TextureRect.size = Vector2(128, 128)
 	$ViewportContainer/Viewport/AnimationPlayer.stop()
 
 func fill_grid(path, ext):
@@ -203,16 +213,17 @@ func fill_grid(path, ext):
 	
 	var total_found = 0
 	
-	var dir = Directory.new()
-	if dir.open(path) == OK:
+	var dir = DirAccess.open(path)
+	if dir:
+		@warning_ignore(return_value_discarded)
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
 		while file_name != "":
 			if not dir.current_is_dir():
 				if file_name.ends_with(ext + ".import" if OS.has_feature("standalone") else ext):
 					var tmp = TextureRect.new()
-					tmp.texture = load(path.plus_file(file_name.replace(".import", "")))
-					tmp.expand = true
+					tmp.texture = load(path.path_join(file_name.replace(".import", "")))
+					tmp.ignore_texture_size = true
 					tmp.size_flags_horizontal = SIZE_EXPAND_FILL
 					tmp.size_flags_vertical = SIZE_EXPAND_FILL
 					grid.add_child(tmp)
@@ -223,5 +234,5 @@ func fill_grid(path, ext):
 		grid.columns = int(sqrt(nearest_po2(total_found)))
 
 func set_render(_val):
-	if _val && Engine.editor_hint:
+	if _val && Engine.is_editor_hint():
 		render_images()

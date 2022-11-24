@@ -1,47 +1,73 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=14 format=3 uid="uid://b32t735vtvy16"]
 
-[ext_resource path="res://icon.png" type="Texture" id=1]
-[ext_resource path="res://testsuite/TestScene.gd" type="Script" id=3]
+[ext_resource type="Texture2D" uid="uid://chqi0r14kbbxs" path="res://icon.svg" id="2_kqmtp"]
+[ext_resource type="Script" path="res://testsuite/TestScene.gd" id="3"]
 
-[sub_resource type="CanvasItemMaterial" id=1]
+[sub_resource type="Image" id="Image_0t6pc"]
+data = {
+"data": PackedByteArray(128, 1, 1),
+"format": "RGB8",
+"height": 1,
+"mipmaps": false,
+"width": 1
+}
+
+[sub_resource type="Image" id="Image_enpjn"]
+data = {
+"data": PackedByteArray(1, 128, 1),
+"format": "RGB8",
+"height": 1,
+"mipmaps": false,
+"width": 1
+}
+
+[sub_resource type="ImageTexture" id="ImageTexture_rk52c"]
+image = SubResource("Image_enpjn")
+
+[sub_resource type="CanvasItemMaterial" id="1"]
 blend_mode = 4
 
-[sub_resource type="Animation" id=2]
+[sub_resource type="Animation" id="2"]
 resource_name = "Noise"
 length = 5.0
-loop = true
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("TextureRect:material:shader_param/offset")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 5 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PackedFloat32Array(0, 5),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [ Vector2( 0, 0 ), Vector2( 1, 0 ) ]
+"values": [Vector2(0, 0), Vector2(1, 0)]
 }
 
-[sub_resource type="Animation" id=7]
+[sub_resource type="Animation" id="7"]
 length = 0.001
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("TextureRect:material:shader_param/offset")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [ Vector2( 0, 0 ) ]
+"values": [Vector2(0, 0)]
 }
 
-[sub_resource type="Shader" id=3]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_haaf3"]
+_data = {
+"Noise": SubResource("2"),
+"RESET": SubResource("7")
+}
+
+[sub_resource type="Shader" id="3"]
 code = "shader_type canvas_item;
 
-uniform sampler2D noise;
+uniform sampler2D noise : repeat_enable;
 uniform vec2 offset = vec2(0,0);
 
 void fragment(){
@@ -49,78 +75,94 @@ void fragment(){
 	COLOR.rgb = texture(noise, UV.rg + offset).rgb;
 }"
 
-[sub_resource type="OpenSimplexNoise" id=5]
+[sub_resource type="FastNoiseLite" id="5"]
+noise_type = 3
+seed = 1
+frequency = 0.005
+fractal_type = 0
 
-[sub_resource type="NoiseTexture" id=6]
+[sub_resource type="NoiseTexture2D" id="6"]
 width = 1024
 height = 1024
-seamless = true
-noise = SubResource( 5 )
+generate_mipmaps = false
+noise = SubResource("5")
 
-[sub_resource type="ShaderMaterial" id=4]
-shader = SubResource( 3 )
-shader_param/offset = Vector2( 0, 0 )
-shader_param/noise = SubResource( 6 )
+[sub_resource type="ShaderMaterial" id="4"]
+shader = SubResource("3")
+shader_parameter/noise = SubResource("6")
+shader_parameter/offset = Vector2(0, 0)
 
 [node name="TestQOI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="Label" type="Label" parent="."]
-margin_left = 146.0
-margin_top = 131.0
-margin_right = 1086.0
-margin_bottom = 424.0
-text = "Before starting this scene, please make sure that you have generated images by clicking \"Render Test Images\" in the parameters of the \"TestQOI\" node,
-after which these images should be imported (just switch to another window and back to Godot).
-To import .png as WebP or PNG, change the 'rendering/misc/lossless_compression/force_png' parameter in the project settings.
-To import PNG as VRAM compressed or lossy WebP, change the default preset for importing textures in the Import tab."
-autowrap = true
-
-[node name="ViewportContainer" type="ViewportContainer" parent="."]
-material = SubResource( 1 )
-margin_right = 128.0
-margin_bottom = 128.0
-stretch = true
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="Viewport" type="Viewport" parent="ViewportContainer"]
-size = Vector2( 128, 128 )
-transparent_bg = true
-handle_input_locally = false
-hdr = false
-disable_3d = true
-usage = 0
-render_target_update_mode = 3
-gui_disable_input = true
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewportContainer/Viewport"]
-anims/Noise = SubResource( 2 )
-anims/RESET = SubResource( 7 )
-
-[node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport"]
-material = SubResource( 4 )
-anchor_right = 1.0
-anchor_bottom = 1.0
-texture = ExtResource( 1 )
-expand = true
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3")
+run_tests = true
+run_benchmark = false
+image_to_test_save = SubResource("Image_0t6pc")
+tex_to_test_save = SubResource("ImageTexture_rk52c")
 
 [node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_lock_": true
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="."]
+material = SubResource("1")
+layout_mode = 1
+offset_left = 25.0
+offset_top = 108.0
+offset_right = 153.0
+offset_bottom = 236.0
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="ViewportContainer"]
+disable_3d = true
+transparent_bg = true
+handle_input_locally = false
+gui_disable_input = true
+size = Vector2i(128, 128)
+render_target_update_mode = 4
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ViewportContainer/Viewport"]
+libraries = {
+"": SubResource("AnimationLibrary_haaf3")
 }
 
+[node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport"]
+texture_repeat = 2
+material = SubResource("4")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1024.0
+offset_bottom = -520.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_kqmtp")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 104.0
+grow_horizontal = 2
+text = "Before starting this scene, please make sure that you have generated images by clicking \"Render Test Images\"
+in the parameters of the \"TestQOI\" node, after which these images should be imported (just switch to another window and back to Godot).
+To import .png as WebP or PNG, change the 'rendering/textures/lossless_compression/force_png' parameter in the project settings.
+To import PNG as VRAM compressed or lossy WebP, change the default preset for importing textures in the Import tab."
+autowrap_mode = 2
+
 [node name="TextureRect" type="TextureRect" parent="."]
-margin_left = 37.4178
-margin_top = 463.267
-margin_right = 367.418
-margin_bottom = 793.267
-expand = true
+layout_mode = 1
+offset_left = 165.0
+offset_top = 110.0
+offset_right = 165.0
+offset_bottom = 110.0

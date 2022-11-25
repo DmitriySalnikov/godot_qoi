@@ -14,25 +14,25 @@ jobs:
         with:
           workflow: windows_builds.yml
           path: extracted_files
-      
+
       - name: Download Linux Binaries
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: linux_builds.yml
           path: extracted_files
-      
+
       - name: Download Android Binaries
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: android_builds.yml
           path: extracted_files
-      
+
       - name: Download MacOS Binaries
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: macos_builds.yml
           path: extracted_files
-      
+
       - name: Upload GDExtension
         uses: actions/upload-artifact@v3
         with:

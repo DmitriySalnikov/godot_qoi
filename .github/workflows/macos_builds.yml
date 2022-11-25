@@ -1,7 +1,15 @@
 name: 🍏 MacOS
 on:
   push:
-    paths: [godot_qoi/**, .github/**, '!.github/**/util_*', '**.patch', lib_utils.py, SConstruct]
+    paths:
+      [
+        godot_qoi/**,
+        .github/**,
+        "!.github/**/util_*",
+        "**.patch",
+        lib_utils.py,
+        SConstruct,
+      ]
   repository_dispatch:
 
 # Stop the same workflow actions
@@ -11,8 +19,14 @@ concurrency:
 
 jobs:
   macos-gdextension:
-    name: MacOS GDExtension ${{ matrix.name }}
+    name: MacOS GDExtension ${{ matrix.arch }} ${{ matrix.target }}
     runs-on: "macos-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [universal]
+        target: [editor, template_release]
 
     steps:
       - name: Checkout
@@ -20,10 +34,11 @@ jobs:
         with:
           lfs: true
           submodules: recursive
-      
-      - name: Compile GDExtension 
+
+      - name: Compile GDExtension
         uses: ./.github/actions/compile_gdextension
         with:
           platform: osx
-          target: release
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
           artifact: macos

@@ -38,7 +38,7 @@ jobs:
       - name: Compile GDExtension
         uses: ./.github/actions/compile_gdextension
         with:
-          platform: osx
+          platform: macos
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           artifact: macos

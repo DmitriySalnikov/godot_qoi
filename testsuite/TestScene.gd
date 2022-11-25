@@ -11,8 +11,8 @@ const img_dir = "res://testsuite/images/"
 @export var render_test_images : bool = false:
 	set = set_render
 
-@export var image_to_test_save := Image.create_from_data(1, 1, false,Image.FORMAT_RGB8, [128, 1, 1])
-@export var tex_to_test_save := ImageTexture.create_from_image(Image.create_from_data(1, 1, false, Image.FORMAT_RGB8, [1, 128, 1]))
+var image_to_test_save := Image.create_from_data(1, 1, false,Image.FORMAT_RGB8, [128, 1, 1])
+var tex_to_test_save := ImageTexture.create_from_image(Image.create_from_data(1, 1, false, Image.FORMAT_RGB8, [1, 128, 1]))
 
 @onready var grid := $GridContainer
 

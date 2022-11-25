@@ -4,10 +4,18 @@ entry_symbol = "godot_qoi_library_init"
 
 [libraries]
 
-macos.debug = "libs/macos/INSERT_NAME_HERE.framework"
-macos.release = "libs/macos/INSERT_NAME_HERE.framework"
+macos.debug = "libs/macos/libgodot_qoi.macos.editor.universal.dylib"
+macos.release = "libs/macos/libgodot_qoi.macos.template_release.universal.dylib"
 windows.debug.x86_64 = "libs/win/godot_qoi.windows.editor.x86_64.dll"
 windows.release.x86_64 = "libs/win/godot_qoi.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "libs/linux/INSERT_NAME_HERE.so"
-linux.release.x86_64 = "libs/linux/INSERT_NAME_HERE.so"
+linux.debug.x86_64 = "libs/linux/libgodot_qoi.linux.editor.x86_64.so"
+linux.release.x86_64 = "libs/linux/libgodot_qoi.linux.template_release.x86_64.so"
+
+# TODO need more testing after https://github.com/godotengine/godot/pull/67906
+
+android.release.arm32 = "libs/android/armeabi-v7a/libgodot_qoi.so"
+android.release.arm64 = "libs/android/arm64-v8a/libgodot_qoi.so"
+android.release.x86_32 = "libs/android/x86/libgodot_qoi.so"
+android.release.x86_64 = "libs/android/x86_64/libgodot_qoi.so"
+
 # Repeat for other architectures to support arm64, rv64, etc.

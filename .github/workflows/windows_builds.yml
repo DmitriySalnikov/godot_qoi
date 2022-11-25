@@ -1,7 +1,15 @@
 name: 🪟 Windows
 on:
   push:
-    paths: [godot_qoi/**, .github/**, '!.github/**/util_*', '**.patch', lib_utils.py, SConstruct]
+    paths:
+      [
+        godot_qoi/**,
+        .github/**,
+        "!.github/**/util_*",
+        "**.patch",
+        lib_utils.py,
+        SConstruct,
+      ]
   repository_dispatch:
 
 # Stop the same workflow actions
@@ -11,18 +19,14 @@ concurrency:
 
 jobs:
   windows-gdextension:
-    name: Windows GDExtension ${{ matrix.name }}
+    name: Windows GDExtension ${{ matrix.arch }} ${{ matrix.target }}
     runs-on: "windows-latest"
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: x64
-            bits: 64
-
-          - name: x86
-            bits: 32
+        arch: [x86_64]
+        target: [editor, template_release]
 
     steps:
       - name: Checkout
@@ -31,10 +35,10 @@ jobs:
           lfs: true
           submodules: recursive
 
-      - name: Compile GDExtension 
+      - name: Compile GDExtension
         uses: ./.github/actions/compile_gdextension
         with:
           platform: windows
-          target: release
-          bits: bits=${{ matrix.bits }}
+          target: ${{ matrix.target }}
+          bits: ${{ matrix.arch }}
           artifact: win

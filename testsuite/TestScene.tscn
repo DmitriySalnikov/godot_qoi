@@ -1,28 +1,7 @@
-[gd_scene load_steps=14 format=3 uid="uid://b32t735vtvy16"]
+[gd_scene load_steps=11 format=3 uid="uid://b32t735vtvy16"]
 
 [ext_resource type="Texture2D" uid="uid://chqi0r14kbbxs" path="res://icon.svg" id="2_kqmtp"]
 [ext_resource type="Script" path="res://testsuite/TestScene.gd" id="3"]
-
-[sub_resource type="Image" id="Image_0t6pc"]
-data = {
-"data": PackedByteArray(128, 1, 1),
-"format": "RGB8",
-"height": 1,
-"mipmaps": false,
-"width": 1
-}
-
-[sub_resource type="Image" id="Image_enpjn"]
-data = {
-"data": PackedByteArray(1, 128, 1),
-"format": "RGB8",
-"height": 1,
-"mipmaps": false,
-"width": 1
-}
-
-[sub_resource type="ImageTexture" id="ImageTexture_rk52c"]
-image = SubResource("Image_enpjn")
 
 [sub_resource type="CanvasItemMaterial" id="1"]
 blend_mode = 4
@@ -100,10 +79,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3")
-run_tests = true
-run_benchmark = false
-image_to_test_save = SubResource("Image_0t6pc")
-tex_to_test_save = SubResource("ImageTexture_rk52c")
 
 [node name="GridContainer" type="GridContainer" parent="."]
 layout_mode = 1

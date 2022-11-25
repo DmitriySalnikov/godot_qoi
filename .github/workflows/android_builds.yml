@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   android-gdextension:
-    name: GDExtension
+    name: Android GDExtension
     runs-on: "ubuntu-latest"
 
     steps:
@@ -38,10 +38,10 @@ jobs:
         run: |
           cd godot-cpp
           # git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
-          scons platform=android android_arch=armv7 target=release generate_bindings=yes -j3
-          scons platform=android android_arch=arm64v8 target=release -j3
-          scons platform=android android_arch=x86 target=release -j3
-          scons platform=android android_arch=x86_64 target=release -j3
+          scons platform=android arch=arm32 target=template_release generate_bindings=yes
+          scons platform=android arch=arm64 target=template_release
+          scons platform=android arch=x86_32 target=template_release
+          scons platform=android arch=x86_64 target=template_release
 
       - name: Compile GDExtension
         run: |

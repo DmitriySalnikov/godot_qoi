@@ -11,8 +11,16 @@ concurrency:
 
 jobs:
   macos-gdextension:
-    name: MacOS GDExtension ${{ matrix.name }}
+    name: MacOS GDExtension ${{ matrix.name }} ${{ matrix.target }}
     runs-on: "macos-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: x64
+            arch: universal
+            target: [editor, template_release]
 
     steps:
       - name: Checkout
@@ -25,5 +33,6 @@ jobs:
         uses: ./.github/actions/compile_gdextension
         with:
           platform: osx
-          target: release
+          target: ${{ matrix.target }}
           artifact: macos
+          arch: ${{ matrix.arch }}

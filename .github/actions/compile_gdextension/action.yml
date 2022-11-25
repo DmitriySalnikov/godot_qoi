@@ -10,6 +10,9 @@ inputs:
   arch:
     description: Arch (universal|x86_32|x86_64|arm32|arm64|rv64|ppc32|ppc64|wasm32)
     default: ""
+  additional:
+    description: Any additional arguments
+    default: ""
   artifact:
     description: Artifact name
     default: "bin"
@@ -31,7 +34,7 @@ runs:
         python -m pip install scons
         python --version
         scons --version
-      
+
     - name: Linux dependencies
       shell: bash
       if: runner.os == 'Linux'
@@ -46,7 +49,7 @@ runs:
       run: |
         # cd godot-cpp
         # git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
-        scons platform=${{ inputs.platform }} arch=${{ inputs.arch }} target=${{ inputs.target }}
+        scons platform=${{ inputs.platform }} arch=${{ inputs.arch }} target=${{ inputs.target }} ${{ inputs.additional }}
 
     - name: Prepare artifact Unix
       if: runner.os != 'Windows'

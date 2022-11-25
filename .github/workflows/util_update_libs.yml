@@ -9,6 +9,9 @@ jobs:
     name: Update GDExtension binaries
     runs-on: ubuntu-latest
 
+    env:
+      libs_path: addons/qoi/libs
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -26,8 +29,8 @@ jobs:
       - name: Replace with new files
         run: |
           ls extracted_files/*
-          rm -rf addons/jolt/libs/
-          mv -f extracted_files addons/jolt/libs
+          rm -rf ${{ env.libs_path }}/
+          mv -f extracted_files ${{ env.libs_path }}
 
       - name: Commit report
         run: |

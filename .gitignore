@@ -2,6 +2,7 @@
 *.dblite
 __pycache__
 *.pyc
+.scons_cache/
 
 # Visual Studio Cache
 .vs/

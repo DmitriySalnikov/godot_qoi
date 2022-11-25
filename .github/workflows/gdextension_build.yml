@@ -1,0 +1,187 @@
+name: 🛠️ GDExtension Build
+on:
+  push:
+    paths:
+      [
+        godot_qoi/**,
+        .github/**,
+        "!.github/**/util_*",
+        "**.patch",
+        lib_utils.py,
+        SConstruct,
+        Android.mk,
+        jni/Application.mk,
+      ]
+  repository_dispatch:
+
+# Stop the same workflow actions
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  SCONS_CACHE: ${{ github.workspace }}/.scons-cache/
+
+jobs:
+  windows-gdextension:
+    name: 🪟 Windows ${{ matrix.arch }} ${{ matrix.target }}
+    runs-on: "windows-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64]
+        target: [editor, template_release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Setup build cache
+        uses: ./.github/actions/gdextension_cache
+        with:
+          target: ${{ matrix.target }}
+        continue-on-error: true
+
+      - name: Compile GDExtension
+        uses: ./.github/actions/compile_gdextension
+        with:
+          platform: windows
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          artifact: win
+
+  # ============================================
+
+  linux-gdextension:
+    name: 🐧 Linux ${{ matrix.arch }} ${{ matrix.target }}
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64]
+        target: [editor, template_release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Setup build cache
+        uses: ./.github/actions/gdextension_cache
+        with:
+          target: ${{ matrix.target }}
+        continue-on-error: true
+
+      - name: Compile GDExtension
+        uses: ./.github/actions/compile_gdextension
+        with:
+          platform: linux
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          artifact: linux
+
+  # ============================================
+
+  macos-gdextension:
+    name: 🍏 MacOS ${{ matrix.arch }} ${{ matrix.target }}
+    runs-on: "macos-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [universal]
+        target: [editor, template_release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Setup build cache
+        uses: ./.github/actions/gdextension_cache
+        with:
+          target: ${{ matrix.target }}
+        continue-on-error: true
+
+      - name: Compile GDExtension
+        uses: ./.github/actions/compile_gdextension
+        with:
+          platform: macos
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          artifact: macos
+
+  # ============================================
+
+  android-gdextension:
+    name: 🤖 Android
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        shell: bash
+        run: |
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Setup build cache
+        uses: ./.github/actions/gdextension_cache
+        continue-on-error: true
+
+      - name: Compile godot-cpp
+        run: |
+          cd godot-cpp
+          # git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
+
+          echo "::group::arm32"
+          scons platform=android arch=arm32 target=template_release generate_bindings=yes
+          echo "::endgroup::"
+
+          echo "::group::arm64"
+          scons platform=android arch=arm64 target=template_release generate_bindings=no
+          echo "::endgroup::"
+
+          echo "::group::x86_32"
+          scons platform=android arch=x86_32 target=template_release generate_bindings=no
+          echo "::endgroup::"
+
+          echo "::group::x86_64"
+          scons platform=android arch=x86_64 target=template_release generate_bindings=no
+          echo "::endgroup::"
+
+      - name: Compile GDExtension
+        run: |
+          $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk  APP_PLATFORM=android-21 -j2
+
+      - name: Prepare Libs
+        run: |
+          rm -rf libs/*/gdb*
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: android
+          retention-days: 7
+          path: libs/*

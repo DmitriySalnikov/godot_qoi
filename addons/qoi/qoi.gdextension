@@ -1,21 +1,37 @@
 [configuration]
 
 entry_symbol = "godot_qoi_library_init"
+autodetect_library_prefix = "res://addons/qoi"
+
+[dependencies]
+
+macos.debug = [ ]
+macos.release = [ ]
+windows.debug.x86_64 = [ ]
+windows.release.x86_64 = [ ]
+linux.debug.x86_64 = [ ]
+linux.release.x86_64 = [ ]
+
+android.release.arm32 = [ ]
+android.release.arm64 = [ ]
+android.release.x86_32 = [ ]
+android.release.x86_64 = [ ]
 
 [libraries]
 
-macos.debug = "libs/macos/libgodot_qoi.macos.editor.universal.dylib"
-macos.release = "libs/macos/libgodot_qoi.macos.template_release.universal.dylib"
-windows.debug.x86_64 = "libs/win/godot_qoi.windows.editor.x86_64.dll"
-windows.release.x86_64 = "libs/win/godot_qoi.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "libs/linux/libgodot_qoi.linux.editor.x86_64.so"
-linux.release.x86_64 = "libs/linux/libgodot_qoi.linux.template_release.x86_64.so"
+macos.debug = "res://addons/qoi/libs/macos/libgodot_qoi.macos.editor.universal.dylib"
+macos.release = "res://addons/qoi/libs/macos/libgodot_qoi.macos.template_release.universal.dylib"
+windows.debug.x86_64 = "res://addons/qoi/libs/win/godot_qoi.windows.editor.x86_64.dll"
+windows.release.x86_64 = "res://addons/qoi/libs/win/godot_qoi.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/qoi/libs/linux/libgodot_qoi.linux.editor.x86_64.so"
+linux.release.x86_64 = "res://addons/qoi/libs/linux/libgodot_qoi.linux.template_release.x86_64.so"
 
-# TODO need more testing after https://github.com/godotengine/godot/pull/67906
-
-android.release.arm32 = "libs/android/armeabi-v7a/libgodot_qoi.so"
-android.release.arm64 = "libs/android/arm64-v8a/libgodot_qoi.so"
-android.release.x86_32 = "libs/android/x86/libgodot_qoi.so"
-android.release.x86_64 = "libs/android/x86_64/libgodot_qoi.so"
+android.release.arm32 = "res://addons/qoi/libs/android/armeabi-v7a/libgodot_qoi.so"
+android.release.arm64 = "res://addons/qoi/libs/android/arm64-v8a/libgodot_qoi.so"
+android.release.x86_32 = "res://addons/qoi/libs/android/x86/libgodot_qoi.so"
+android.release.x86_64 = "res://addons/qoi/libs/android/x86_64/libgodot_qoi.so"
 
 # Repeat for other architectures to support arm64, rv64, etc.
+
+# TODO need more testing after https://github.com/godotengine/godot/pull/67906
+# TODO remove absolute paths

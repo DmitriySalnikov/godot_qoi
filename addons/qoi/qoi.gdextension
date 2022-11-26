@@ -12,6 +12,11 @@ windows.release.x86_64 = [ ]
 linux.debug.x86_64 = [ ]
 linux.release.x86_64 = [ ]
 
+android.debug.arm32 = [ ]
+android.debug.arm64 = [ ]
+android.debug.x86_32 = [ ]
+android.debug.x86_64 = [ ]
+
 android.release.arm32 = [ ]
 android.release.arm64 = [ ]
 android.release.x86_32 = [ ]
@@ -26,10 +31,15 @@ windows.release.x86_64 = "res://addons/qoi/libs/win/godot_qoi.windows.template_r
 linux.debug.x86_64 = "res://addons/qoi/libs/linux/libgodot_qoi.linux.editor.x86_64.so"
 linux.release.x86_64 = "res://addons/qoi/libs/linux/libgodot_qoi.linux.template_release.x86_64.so"
 
-android.release.arm32 = "res://addons/qoi/libs/android/armeabi-v7a/libgodot_qoi.so"
-android.release.arm64 = "res://addons/qoi/libs/android/arm64-v8a/libgodot_qoi.so"
-android.release.x86_32 = "res://addons/qoi/libs/android/x86/libgodot_qoi.so"
-android.release.x86_64 = "res://addons/qoi/libs/android/x86_64/libgodot_qoi.so"
+android.debug.arm32 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_debug.arm32.so"
+android.debug.arm64 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_debug.arm64.so"
+android.debug.x86_32 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_debug.x86_32.so"
+android.debug.x86_64 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_debug.x86_64.so"
+
+android.release.arm32 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_release.arm32.so"
+android.release.arm64 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_release.arm64.so"
+android.release.x86_32 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_release.x86_32.so"
+android.release.x86_64 = "res://addons/qoi/libs/android/libgodot_qoi.android.template_release.x86_64.so"
 
 # Repeat for other architectures to support arm64, rv64, etc.
 

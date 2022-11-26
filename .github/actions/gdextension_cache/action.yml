@@ -7,8 +7,8 @@ inputs:
   scons-cache:
     description: The scons cache path.
     default: "${{github.workspace}}/.scons-cache/"
-  target:
-    description: Target build name.
+  config:
+    description: Config name.
     default: ""
 runs:
   using: "composite"
@@ -25,8 +25,8 @@ runs:
       uses: actions/cache@v3
       with:
         path: ${{inputs.scons-cache}}
-        key: ${{inputs.cache-name}}-${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
+        key: ${{inputs.cache-name}}-${{inputs.config}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
         restore-keys: |
-          ${{inputs.cache-name}}-${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
-          ${{inputs.cache-name}}-${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}
-          ${{inputs.cache-name}}-${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}
+          ${{inputs.cache-name}}-${{inputs.config}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
+          ${{inputs.cache-name}}-${{inputs.config}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}
+          ${{inputs.cache-name}}-${{inputs.config}}-${{steps.get_godot_cpp_sha.outputs.sha}}

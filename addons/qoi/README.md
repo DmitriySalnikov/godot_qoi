@@ -6,7 +6,7 @@ This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrappe
 
 This is a GDExtension library. Includes precompiled binaries for `Windows`, `Linux`, `macOS` and `Android`, but it must compile for each platform which Godot Engine supports.
 
-## [Godot 3 version](https://github.com/DmitriySalnikov/godot_qoi/tree/godot_3)
+[Godot 3 version](https://github.com/DmitriySalnikov/godot_qoi/tree/godot_3)
 
 ## Features
 

@@ -2,9 +2,11 @@
 
 # godot_qoi
 
-This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrapper for Godot Engine. This addon will allow you to read, write, encode and decode images to or from the QOI format.
+This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrapper for Godot Engine 3. This addon will allow you to read, write, encode and decode images to or from the QOI format.
 
 This is a GDNative library. Includes precompiled binaries for `Windows`, `Linux`, `macOS` and `Android`, but it must compile for each platform which Godot Engine supports.
+
+[Godot 4 version](https://github.com/DmitriySalnikov/godot_qoi/tree/master)
 
 ## Features
 

@@ -9,8 +9,6 @@ on:
         "**.patch",
         lib_utils.py,
         SConstruct,
-        Android.mk,
-        jni/Application.mk,
       ]
   repository_dispatch:
 
@@ -24,7 +22,7 @@ env:
 
 jobs:
   windows-gdextension:
-    name: 🪟 Windows ${{ matrix.arch }} ${{ matrix.target }}
+    name: 🪟 Windows
     runs-on: "windows-latest"
 
     strategy:
@@ -43,7 +41,7 @@ jobs:
       - name: Setup build cache
         uses: ./.github/actions/gdextension_cache
         with:
-          target: ${{ matrix.target }}
+          config: ${{ matrix.arch }}_${{ matrix.target }}
         continue-on-error: true
 
       - name: Compile GDExtension
@@ -57,7 +55,7 @@ jobs:
   # ============================================
 
   linux-gdextension:
-    name: 🐧 Linux ${{ matrix.arch }} ${{ matrix.target }}
+    name: 🐧 Linux
     runs-on: "ubuntu-latest"
 
     strategy:
@@ -76,7 +74,7 @@ jobs:
       - name: Setup build cache
         uses: ./.github/actions/gdextension_cache
         with:
-          target: ${{ matrix.target }}
+          config: ${{ matrix.arch }}_${{ matrix.target }}
         continue-on-error: true
 
       - name: Compile GDExtension
@@ -90,7 +88,7 @@ jobs:
   # ============================================
 
   macos-gdextension:
-    name: 🍏 MacOS ${{ matrix.arch }} ${{ matrix.target }}
+    name: 🍏 MacOS
     runs-on: "macos-latest"
 
     strategy:
@@ -109,7 +107,7 @@ jobs:
       - name: Setup build cache
         uses: ./.github/actions/gdextension_cache
         with:
-          target: ${{ matrix.target }}
+          config: ${{ matrix.arch }}_${{ matrix.target }}
         continue-on-error: true
 
       - name: Compile GDExtension
@@ -126,6 +124,12 @@ jobs:
     name: 🤖 Android
     runs-on: "ubuntu-latest"
 
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [arm32, arm64, x86_32, x86_64]
+        target: [template_debug, template_release]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -133,55 +137,16 @@ jobs:
           lfs: true
           submodules: recursive
 
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.x"
-          architecture: "x64"
-
-      - name: Configuring Python packages
-        shell: bash
-        run: |
-          python -m pip install scons
-          python --version
-          scons --version
-
       - name: Setup build cache
         uses: ./.github/actions/gdextension_cache
+        with:
+          config: ${{ matrix.arch }}_${{ matrix.target }}
         continue-on-error: true
 
-      - name: Compile godot-cpp
-        run: |
-          cd godot-cpp
-          # git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_trim_unused_classes.patch
-
-          echo "::group::arm32"
-          scons platform=android arch=arm32 target=template_release generate_bindings=yes
-          echo "::endgroup::"
-
-          echo "::group::arm64"
-          scons platform=android arch=arm64 target=template_release generate_bindings=no
-          echo "::endgroup::"
-
-          echo "::group::x86_32"
-          scons platform=android arch=x86_32 target=template_release generate_bindings=no
-          echo "::endgroup::"
-
-          echo "::group::x86_64"
-          scons platform=android arch=x86_64 target=template_release generate_bindings=no
-          echo "::endgroup::"
-
       - name: Compile GDExtension
-        run: |
-          $ANDROID_NDK_ROOT/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk  APP_PLATFORM=android-21 -j2
-
-      - name: Prepare Libs
-        run: |
-          rm -rf libs/*/gdb*
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: ./.github/actions/compile_gdextension
         with:
-          name: android
-          retention-days: 7
-          path: libs/*
+          platform: android
+          target: ${{ matrix.target }}
+          arch: ${{ matrix.arch }}
+          artifact: android

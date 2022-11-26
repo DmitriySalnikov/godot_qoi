@@ -52,7 +52,7 @@ runs:
         scons platform=${{ inputs.platform }} arch=${{ inputs.arch }} target=${{ inputs.target }} ${{ inputs.additional }}
 
     - name: Prepare artifact Unix
-      if: runner.os != 'Windows'
+      if: runner.os != 'Windows' && inputs.platform != 'android'
       shell: bash
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then

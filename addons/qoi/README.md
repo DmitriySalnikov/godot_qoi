@@ -12,6 +12,7 @@ This is a GDExtension library. Includes precompiled binaries for `Windows`, `Lin
 
 * Fastest encoding
 * Fast decoding
+* QOI is a compressible format
 * Editor integration
 * Cross-platform
 * Simple API

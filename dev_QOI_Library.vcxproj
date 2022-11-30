@@ -165,17 +165,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="godot_qoi\qoi_import.cpp" />
-    <ClCompile Include="godot_qoi\qoi_save.cpp" />
-    <ClCompile Include="godot_qoi\qoi_wrapper.cpp" />
-    <ClCompile Include="godot_qoi\register_types.cpp" />
+    <ClCompile Include="src\qoi_import.cpp" />
+    <ClCompile Include="src\qoi_save.cpp" />
+    <ClCompile Include="src\qoi_wrapper.cpp" />
+    <ClCompile Include="src\register_types.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="godot_qoi\qoi.h" />
-    <ClInclude Include="godot_qoi\qoi_import.h" />
-    <ClInclude Include="godot_qoi\qoi_save.h" />
-    <ClInclude Include="godot_qoi\qoi_shared.h" />
-    <ClInclude Include="godot_qoi\qoi_wrapper.h" />
+    <ClInclude Include="src\qoi.h" />
+    <ClInclude Include="src\qoi_import.h" />
+    <ClInclude Include="src\qoi_save.h" />
+    <ClInclude Include="src\qoi_shared.h" />
+    <ClInclude Include="src\qoi_wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="addons\qoi\qoi.gdextension" />

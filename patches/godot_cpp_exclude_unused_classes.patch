@@ -1,0 +1,95 @@
+diff --git a/binding_generator.py b/binding_generator.py
+index fd994bf..8d4b99a 100644
+--- a/binding_generator.py
++++ b/binding_generator.py
+@@ -5,6 +5,64 @@ import re
+ import shutil
+ from pathlib import Path
+ 
++# This patch does not affect the size of the library, but speeds up the build time.
++# TODO Change this list to include the required classes
++USED_CLASSES = ["Image", "ResourceFormatSaver", "ImageFormatLoaderExtension", "FileAccess", "Texture2D", "ProjectSettings", "ResourceSaver"]
++DEPENDENCIES = []
++TEMP_ENGINE_CLASS_NAMES = []
++
++# Set USED_CLASSES to empty list to disable class excluding
++#USED_CLASSES = []
++
++def SCAN_DEPENDENCIES(api):
++    for class_api in api["classes"]:
++        TEMP_ENGINE_CLASS_NAMES.append(class_api["name"])
++    for name in USED_CLASSES:
++        _GET_DEPS(api, name)
++    print("Explicit classes: " + str(USED_CLASSES))
++    print("Implicit classes: " + str(DEPENDENCIES))
++
++def _GET_DEPS(api, name):
++    def CLASS_FROM_ENUM(c_name):
++        if c_name.startswith("enum::"):
++            return c_name[len("enum::"):].partition(".")[0]
++        return c_name
++
++    def IS_ENGINE_CLASS(c_name):
++        if c_name in TEMP_ENGINE_CLASS_NAMES:
++            return True
++        return False
++    
++    for class_api in api["classes"]:
++        if class_api["name"] == name:
++            need_to_add = []
++
++            if class_api["name"] == "Object":
++                break
++
++            if class_api["inherits"] not in DEPENDENCIES:
++                need_to_add.append(class_api["inherits"])
++            if "methods" in class_api:
++                for method in class_api["methods"]:
++                    if "return_value" in method:
++                        r = CLASS_FROM_ENUM(method["return_value"]["type"])
++                        if IS_ENGINE_CLASS(r):
++                            if r not in need_to_add: need_to_add.append(r)
++                    if "arguments" in method:
++                        for arg in method["arguments"]:
++                            t = CLASS_FROM_ENUM(arg["type"])
++                            if IS_ENGINE_CLASS(t):
++                                if t not in need_to_add: need_to_add.append(t)
++            
++            for c in need_to_add:
++                if c not in DEPENDENCIES:
++                    DEPENDENCIES.append(c)
++                    _GET_DEPS(api, c)
++
++            break
++
++def NEED_TO_EXCLUDE(name):
++    return len(USED_CLASSES) > 0 and name not in USED_CLASSES and name not in DEPENDENCIES
+ 
+ def generate_mod_version(argcount, const=False, returns=False):
+     s = """
+@@ -77,6 +135,7 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
+     with open(api_filepath) as api_file:
+         api = json.load(api_file)
+ 
++    SCAN_DEPENDENCIES(api)
+     core_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp" / "core"
+     include_gen_folder = Path(output_dir) / "gen" / "include" / "godot_cpp"
+     source_gen_folder = Path(output_dir) / "gen" / "src"
+@@ -101,6 +160,8 @@ def get_file_list(api_filepath, output_dir, headers=False, sources=False):
+         # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+         if engine_class["name"] == "ClassDB":
+             continue
++        if NEED_TO_EXCLUDE(engine_class["name"]):
++            continue
+         header_filename = include_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".hpp")
+         source_filename = source_gen_folder / "classes" / (camel_to_snake(engine_class["name"]) + ".cpp")
+         if headers:
+@@ -962,6 +1023,8 @@ def generate_engine_classes_bindings(api, output_dir, use_template_get_node):
+         # TODO: Properly setup this singleton since it conflicts with ClassDB in the bindings.
+         if class_api["name"] == "ClassDB":
+             continue
++        if NEED_TO_EXCLUDE(class_api["name"]):
++            continue
+         # Check used classes for header include.
+         used_classes = set()
+         fully_used_classes = set()

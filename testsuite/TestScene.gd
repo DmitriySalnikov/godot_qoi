@@ -45,7 +45,7 @@ func test_api():
 	
 	#################
 	# prepare
-	var test_dir = "res://testsuite/images/tests/"
+	var test_dir = "user://tests/"
 	#var locked_file = "locked.qoi"
 	var good_qoi = "good.qoi"
 	var broken_qoi = "broken.qoi"
@@ -53,20 +53,18 @@ func test_api():
 	var good_image : Image = load("res://icon.svg").get_image()
 	var good_tex : ImageTexture = ImageTexture.new()
 	
-	@warning_ignore(return_value_discarded)
-	var files_to_delete = DirAccess.get_files_at(test_dir)
-	for f in files_to_delete:
-		@warning_ignore(return_value_discarded)
-		DirAccess.remove_absolute(test_dir.path_join(f))
+	if DirAccess.dir_exists_absolute(test_dir):
+		var files_to_delete = DirAccess.get_files_at(test_dir)
+		for f in files_to_delete:
+			@warning_ignore(return_value_discarded)
+			DirAccess.remove_absolute(test_dir.path_join(f))
 	
 	@warning_ignore(return_value_discarded)
 	DirAccess.make_dir_recursive_absolute(test_dir)
-	var file = FileAccess.open(test_dir.path_join(".gdignore"), FileAccess.WRITE)
-	file = null
 	
 	@warning_ignore(return_value_discarded)
 	QOI.write(test_dir.path_join(good_qoi), good_image)
-	file = FileAccess.open(test_dir.path_join(broken_qoi), FileAccess.WRITE)
+	var file = FileAccess.open(test_dir.path_join(broken_qoi), FileAccess.WRITE)
 	file.store_buffer("definitely broken qoi data...".to_utf8_buffer())
 	file = null
 	
@@ -93,10 +91,11 @@ func test_api():
 	assert(QOI.encode(null).size() == 0, "Encode null Image can't be performed.")
 	assert(QOI.encode(Image.new()).size() == 0, "Encode empty Image can't be performed.")
 	
-	var unsupported_image : Image = good_image.duplicate()
-	@warning_ignore(return_value_discarded)
-	unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, 0.5)
-	assert(QOI.write(test_dir.path_join("unsupported format.qoi"), unsupported_image) != OK, "Write can't be performed with usupported Image format.")
+	if !OS.has_feature("mobile"):
+		var unsupported_image : Image = good_image.duplicate()
+		@warning_ignore(return_value_discarded)
+		unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, 0.5)
+		assert(QOI.write(test_dir.path_join("unsupported format.qoi"), unsupported_image) != OK, "Write can't be performed with usupported Image format.")
 	
 	assert(QOI.encode(good_image).size() != 0, "Encode correct Image must be performed.")
 	

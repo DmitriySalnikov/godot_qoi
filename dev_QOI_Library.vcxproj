@@ -178,6 +178,7 @@
     <ClInclude Include="godot_qoi\qoi_wrapper.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="addons\qoi\qoi.gdextension" />
     <None Include="lib_utils.py" />
     <None Include="SConstruct" />
   </ItemGroup>

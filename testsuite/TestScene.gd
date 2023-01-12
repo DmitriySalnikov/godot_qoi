@@ -126,8 +126,8 @@ func start_bench():
 			result[ext].append(time)
 			print("Run: %d, Ext: %s, %.3f ms" % [i, ext, time / 1000.0])
 			
-			# show images for 1 frame
-			await get_tree().process_frame
+			# show images for 0.5 sec
+			await get_tree().create_timer(0.5).timeout
 			# Clear
 			var ch = grid.get_children()
 			for c in ch:
@@ -210,6 +210,7 @@ func render_images():
 	$ViewportContainer/Viewport/AnimationPlayer.stop()
 
 
+var is_printed_count_once := []
 func fill_grid(path, ext):
 	var ch = grid.get_children()
 	for c in ch:
@@ -224,7 +225,7 @@ func fill_grid(path, ext):
 		var file_name = dir.get_next()
 		while file_name != "":
 			if not dir.current_is_dir():
-				if file_name.ends_with(ext + ".import" if OS.has_feature("standalone") else ext):
+				if file_name.ends_with(ext + ".import" if OS.has_feature("template") else ext):
 					var tmp = TextureRect.new()
 					tmp.texture = load(path.path_join(file_name.replace(".import", "")))
 					tmp.ignore_texture_size = true
@@ -235,6 +236,9 @@ func fill_grid(path, ext):
 					total_found += 1
 			file_name = dir.get_next()
 		
+		if ext not in is_printed_count_once:
+			is_printed_count_once.push_back(ext)
+			print("Found images: %d" % total_found)
 		grid.columns = int(sqrt(nearest_po2(total_found)))
 
 

@@ -24,7 +24,7 @@ __pycache__
 *.exe
 *.264
 *.exp
-#*.lib
+*.lib
 *.vcxproj.filters
 *.vcxproj.user
 *.os
@@ -38,4 +38,3 @@ obj/
 bin/
 /libs/
 testsuite/images/
-addons/godot_qoi/libs/windows/*.lib

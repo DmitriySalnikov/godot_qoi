@@ -2,7 +2,7 @@
 
 # godot_qoi
 
-This is a QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) wrapper for Godot Engine 4.x. This addon will allow you to read, write, encode and decode images to or from the QOI format.
+QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) integration for Godot Engine 4.x.
 
 This is a GDExtension library. Includes precompiled binaries for `Windows`, `Linux`, `macOS` and `Android`, but it must compile for each platform which Godot Engine supports.
 
@@ -10,16 +10,14 @@ This is a GDExtension library. Includes precompiled binaries for `Windows`, `Lin
 
 ## Features
 
-* Fastest encoding
-* Fast decoding
-* QOI is a compressible format
-* Editor integration
+* Fastest encoding and fast decoding (when working with the QOI class)
+* Editor integration (use .qoi like regular textures)
 * Cross-platform
 * Simple API
 
 ## Disadvantage
 
-* Large file size (compared to PNG or WebP. more than 2-3 times larger)
+* Large file size when working with `.qoi` files directly (compared to PNG or WebP. more than 2-3 times larger)
 
 ## Approximate comparison of QOI encoding speed vs PNG
 

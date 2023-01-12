@@ -117,6 +117,7 @@ libraries = {
 [node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport"]
 texture_repeat = 2
 material = SubResource("4")
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -48.0

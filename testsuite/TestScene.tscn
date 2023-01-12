@@ -1,6 +1,5 @@
 [gd_scene load_steps=11 format=3 uid="uid://b32t735vtvy16"]
 
-[ext_resource type="Texture2D" uid="uid://chqi0r14kbbxs" path="res://icon.svg" id="2_kqmtp"]
 [ext_resource type="Script" path="res://testsuite/TestScene.gd" id="3"]
 
 [sub_resource type="CanvasItemMaterial" id="1"]
@@ -9,6 +8,7 @@ blend_mode = 4
 [sub_resource type="Animation" id="2"]
 resource_name = "Noise"
 length = 5.0
+loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -68,8 +68,12 @@ noise = SubResource("5")
 
 [sub_resource type="ShaderMaterial" id="4"]
 shader = SubResource("3")
-shader_parameter/noise = SubResource("6")
 shader_parameter/offset = Vector2(0, 0)
+shader_parameter/noise = SubResource("6")
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1tydc"]
+width = 64
+height = 64
 
 [node name="TestQOI" type="Control"]
 layout_mode = 3
@@ -91,10 +95,10 @@ grow_vertical = 2
 [node name="ViewportContainer" type="SubViewportContainer" parent="."]
 material = SubResource("1")
 layout_mode = 1
-offset_left = 25.0
-offset_top = 108.0
-offset_right = 153.0
-offset_bottom = 236.0
+offset_left = 33.0
+offset_top = 148.0
+offset_right = 161.0
+offset_bottom = 276.0
 stretch = true
 
 [node name="Viewport" type="SubViewport" parent="ViewportContainer"]
@@ -113,14 +117,15 @@ libraries = {
 [node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport"]
 texture_repeat = 2
 material = SubResource("4")
-anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -1024.0
-offset_bottom = -520.0
+offset_left = -48.0
+offset_top = -48.0
+offset_right = -976.0
+offset_bottom = -472.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_kqmtp")
+texture = SubResource("NoiseTexture2D_1tydc")
 metadata/_edit_use_anchors_ = true
 
 [node name="Label" type="Label" parent="."]
@@ -129,15 +134,15 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 104.0
 grow_horizontal = 2
-text = "Before starting this scene, please make sure that you have generated images by clicking \"Render Test Images\"
-in the parameters of the \"TestQOI\" node, after which these images should be imported (just switch to another window and back to Godot).
+text = "Before starting this scene, please make sure that you have generated images by clicking \"Render test images\" in the parameters of the \"TestQOI\" node. You can cancel this process by holding down the ESC button.
+After that, these images should be imported (just switch to another window and return to Godot after the process is complete).
 To import .png as WebP or PNG, change the 'rendering/textures/lossless_compression/force_png' parameter in the project settings.
 To import PNG as VRAM compressed or lossy WebP, change the default preset for importing textures in the Import tab."
 autowrap_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
-offset_left = 165.0
-offset_top = 110.0
-offset_right = 165.0
-offset_bottom = 110.0
+offset_left = 200.0
+offset_top = 148.0
+offset_right = 200.0
+offset_bottom = 148.0

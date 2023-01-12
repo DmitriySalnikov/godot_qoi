@@ -13,8 +13,8 @@ using namespace godot;
 Ref<QOIImport> qoi_import_plugin;
 Ref<QOIResourceSaver> qoi_resource_saver;
 
-/** GDNative Initialize **/
-extern "C" void GDN_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
+/** GDExtension Initialize **/
+extern "C" void GDE_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
@@ -52,8 +52,8 @@ extern "C" void GDN_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel
 	}
 }
 
-/** GDNative Uninitialize **/
-extern "C" void GDN_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLevel p_level) {
+/** GDExtension Uninitialize **/
+extern "C" void GDE_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLevel p_level) {
 	if (qoi_import_plugin.is_valid())
 		qoi_import_plugin->remove_format_loader();
 	qoi_import_plugin.unref();
@@ -63,9 +63,9 @@ extern "C" void GDN_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLev
 	qoi_resource_saver.unref();
 }
 
-/** GDNative Initialize **/
+/** GDExtension Initialize **/
 extern "C" {
-GDNativeBool GDN_EXPORT godot_qoi_library_init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
+GDExtensionBool GDE_EXPORT godot_qoi_library_init(const GDExtensionInterface *p_interface, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
 	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
 
 	init_obj.register_initializer(initialize_godot_qoi_module);

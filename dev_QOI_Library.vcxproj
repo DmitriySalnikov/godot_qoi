@@ -58,26 +58,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='template_debug|x64'">
-    <IncludePath>$(ProjectDir)godot-cpp\godot-headers;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)godot-cpp\gdextension;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)godot-cpp\bin;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\bin\</OutDir>
+    <OutDir>$(SolutionDir)addons\godot_qoi\libs\windows\</OutDir>
     <TargetName>godot_qoi.windows.$(Configuration).$(LlvmPlatformName)</TargetName>
     <IntDir>$(SolutionDir)obj\$(PlatformTarget)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='template_dev|x64'">
-    <IncludePath>$(ProjectDir)godot-cpp\godot-headers;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)godot-cpp\gdextension;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)godot-cpp\bin;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\bin\</OutDir>
+    <OutDir>$(SolutionDir)addons\godot_qoi\libs\windows\</OutDir>
     <TargetName>godot_qoi.windows.template_debug.$(LlvmPlatformName)</TargetName>
     <IntDir>$(SolutionDir)obj\$(PlatformTarget)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='template_release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)godot-cpp\godot-headers;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)godot-cpp\gdextension;$(ProjectDir)godot-cpp\gen\include;$(ProjectDir)godot-cpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)godot-cpp\bin;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)\bin\</OutDir>
+    <OutDir>$(SolutionDir)addons\godot_qoi\libs\windows\</OutDir>
     <TargetName>godot_qoi.windows.$(Configuration).$(LlvmPlatformName)</TargetName>
     <IntDir>$(SolutionDir)obj\$(PlatformTarget)\</IntDir>
   </PropertyGroup>

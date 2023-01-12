@@ -16,6 +16,7 @@ var tex_to_test_save := ImageTexture.create_from_image(Image.create_from_data(1,
 
 @onready var grid := $GridContainer
 
+
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		$ViewportContainer.queue_free()
@@ -23,6 +24,7 @@ func _ready() -> void:
 		if run_benchmark:
 			await get_tree().process_frame
 			start_bench()
+
 
 func test_api():
 	@warning_ignore(return_value_discarded)
@@ -109,6 +111,7 @@ func test_api():
 	assert(QOI.read(test_dir.path_join("1x1_img.qoi")), "Image must be saved to QOI via ResourceSaver and loaded correctly.")
 	assert(QOI.read(test_dir.path_join("1x1_tex.qoi")), "Texture must be saved to QOI via ResourceSaver and loaded correctly.")
 
+
 func start_bench():
 	var result = {}
 	var dir = img_dir.path_join("%dx%d_%d" % [image_width, image_height, frames_to_render])
@@ -172,6 +175,7 @@ func start_bench():
 		var e = ext if ext != "png" else (vram_format if is_vram else (("webp lossy" if is_lossy else "webp") if is_webp else "png" ))
 		print("%s:\t%.3f ms" % [e, (sum / float(result[ext].size())) / 1000.0])
 
+
 func render_images():
 	var fin_dir = img_dir.path_join("%dx%d_%d" % [image_width, image_height, frames_to_render])
 	@warning_ignore(return_value_discarded)
@@ -205,6 +209,7 @@ func render_images():
 	$ViewportContainer/Viewport/TextureRect.size = Vector2(128, 128)
 	$ViewportContainer/Viewport/AnimationPlayer.stop()
 
+
 func fill_grid(path, ext):
 	var ch = grid.get_children()
 	for c in ch:
@@ -231,6 +236,7 @@ func fill_grid(path, ext):
 			file_name = dir.get_next()
 		
 		grid.columns = int(sqrt(nearest_po2(total_found)))
+
 
 func set_render(_val):
 	if _val && Engine.is_editor_hint():

@@ -38,4 +38,4 @@ obj/
 bin/
 /libs/
 testsuite/images/
-addons/qoi/libs/win/*.lib
+addons/godot_qoi/libs/windows/*.lib

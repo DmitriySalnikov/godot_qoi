@@ -21,14 +21,3 @@
 
 #define TEXT(t) #t
 #define PRINT(text) godot::UtilityFunctions::print(godot::Variant(text))
-
-namespace godot {
-static String get_file_name_in_repository(String name) {
-	if (name != "") {
-		int64_t idx = name.find("src");
-		if (idx != -1)
-			name = name.substr(name.find("src"), name.length());
-	}
-	return name;
-}
-} // namespace godot

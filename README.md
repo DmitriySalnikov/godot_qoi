@@ -1,1 +1,1 @@
-addons/qoi/README.md
+addons/godot_qoi/README.md

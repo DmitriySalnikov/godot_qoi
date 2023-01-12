@@ -2,6 +2,7 @@
 *.dblite
 __pycache__
 *.pyc
+.scons_cache/
 
 # Visual Studio Cache
 .vs/
@@ -29,10 +30,12 @@ __pycache__
 *.os
 *.out
 
+used_classes.json
+
 .import/
 .mono/
 obj/
 bin/
 /libs/
 testsuite/images/
-addons/qoi/libs/win/*.lib
+addons/godot_qoi/libs/windows/*.lib

@@ -228,7 +228,7 @@ func fill_grid(path, ext):
 				if file_name.ends_with(ext + ".import" if OS.has_feature("template") else ext):
 					var tmp = TextureRect.new()
 					tmp.texture = load(path.path_join(file_name.replace(".import", "")))
-					tmp.ignore_texture_size = true
+					tmp.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 					tmp.size_flags_horizontal = SIZE_EXPAND_FILL
 					tmp.size_flags_vertical = SIZE_EXPAND_FILL
 					grid.add_child(tmp)

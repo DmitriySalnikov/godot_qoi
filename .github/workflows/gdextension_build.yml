@@ -10,6 +10,7 @@ on:
         lib_utils.py,
         SConstruct,
       ]
+  workflow_dispatch:
   repository_dispatch:
 
 # Stop the same workflow actions

@@ -14,7 +14,7 @@ body:
     label: Feature description
     description: |
       Briefly describe your suggestion.
-      You can include images or videos with drag and drop, and format code blocks.
+      You can include images or videos with drag and drop, and format code blocks or logs with <code>```</code> tags.
   validations:
     required: true
 

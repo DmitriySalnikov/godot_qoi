@@ -10,7 +10,7 @@ class QOI : public RefCounted {
 	friend class QOIImport;
 
 private:
-	static int decode_to_image(const PackedByteArray &data, const Ref<Image> &out_image);
+	static Error decode_to_image(const PackedByteArray &data, const Ref<Image> &out_image);
 
 protected:
 	static void _bind_methods();
@@ -18,6 +18,6 @@ protected:
 public:
 	static Ref<Image> read(String path);
 	static Ref<Image> decode(const PackedByteArray &data);
-	static int write(String path, Ref<Image> img);
+	static Error write(String path, Ref<Image> img);
 	static PackedByteArray encode(Ref<Image> img);
 };

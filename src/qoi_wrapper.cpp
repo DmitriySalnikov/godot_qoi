@@ -39,7 +39,7 @@ Ref<Image> QOI::decode(const PackedByteArray &data) {
 	return img;
 }
 
-int QOI::decode_to_image(const PackedByteArray &data, const Ref<Image> &out_image) {
+Error QOI::decode_to_image(const PackedByteArray &data, const Ref<Image> &out_image) {
 	qoi_desc desc;
 	void *out;
 
@@ -63,7 +63,7 @@ int QOI::decode_to_image(const PackedByteArray &data, const Ref<Image> &out_imag
 	return Error::OK;
 }
 
-int QOI::write(String path, Ref<Image> img) {
+Error QOI::write(String path, Ref<Image> img) {
 	ERR_FAIL_COND_V_MSG(img.is_null(), Error::ERR_INVALID_PARAMETER, "Image cannot be null");
 	ERR_FAIL_COND_V_MSG(img->is_empty(), Error::ERR_INVALID_PARAMETER, "Image cannot be empty");
 

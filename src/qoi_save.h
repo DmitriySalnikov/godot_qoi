@@ -20,7 +20,7 @@ protected:
 	static void _bind_methods(){};
 
 public:
-	virtual int64_t _save(const Ref<Resource> &resource, const String &path, int64_t flags) override;
+	virtual Error _save(const Ref<Resource> &resource, const String &path, uint32_t flags) override;
 	virtual bool _recognize(const Ref<Resource> &resource) const override;
 	virtual PackedStringArray _get_recognized_extensions(const Ref<Resource> &resource) const override;
 	virtual bool _recognize_path(const Ref<Resource> &resource, const String &path) const override;

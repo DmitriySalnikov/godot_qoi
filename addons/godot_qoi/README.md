@@ -62,7 +62,7 @@ Image decode(data : PackedByteArray) static
 
 # Write the Image as a file in QOI format
 # @return code of Error
-int write(path : String, image : Image) static
+Error write(path : String, image : Image) static
 
 # Encode the Image in QOI format as an array of bytes
 # @return an array of bytes. If an error occurs, it is empty.

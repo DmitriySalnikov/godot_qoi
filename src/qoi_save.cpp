@@ -1,9 +1,17 @@
 #include "qoi_save.h"
 #include "qoi_wrapper.h"
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4244)
+#endif
+
 #include <godot_cpp/classes/texture2d.hpp>
 
-int64_t QOIResourceSaver::_save(const Ref<Resource> &resource, const String &path, int64_t flags) {
+#if defined(_MSC_VER)
+#pragma warning(default : 4244)
+#endif
+
+Error QOIResourceSaver::_save(const Ref<Resource> &resource, const String &path, uint32_t flags) {
 	{
 		Ref<Image> img = resource;
 		if (img.is_valid())

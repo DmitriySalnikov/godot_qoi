@@ -27,7 +27,7 @@ func _ready() -> void:
 
 
 func test_api():
-	@warning_ignore(return_value_discarded)
+	@warning_ignore("return_value_discarded")
 	QOI.write("user://example.qoi", load("res://icon.svg").get_image())
 	var img = QOI.read("user://example.qoi")
 	var enc = QOI.encode(img)
@@ -58,13 +58,13 @@ func test_api():
 	if DirAccess.dir_exists_absolute(test_dir):
 		var files_to_delete = DirAccess.get_files_at(test_dir)
 		for f in files_to_delete:
-			@warning_ignore(return_value_discarded)
+			@warning_ignore("return_value_discarded")
 			DirAccess.remove_absolute(test_dir.path_join(f))
 	
-	@warning_ignore(return_value_discarded)
+	@warning_ignore("return_value_discarded")
 	DirAccess.make_dir_recursive_absolute(test_dir)
 	
-	@warning_ignore(return_value_discarded)
+	@warning_ignore("return_value_discarded")
 	QOI.write(test_dir.path_join(good_qoi), good_image)
 	var file = FileAccess.open(test_dir.path_join(broken_qoi), FileAccess.WRITE)
 	file.store_buffer("definitely broken qoi data...".to_utf8_buffer())
@@ -95,8 +95,8 @@ func test_api():
 	
 	if !OS.has_feature("mobile"):
 		var unsupported_image : Image = good_image.duplicate()
-		@warning_ignore(return_value_discarded)
-		unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, 0.5)
+		@warning_ignore("return_value_discarded")
+		unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, Image.ASTC_FORMAT_4x4)
 		assert(QOI.write(test_dir.path_join("unsupported format.qoi"), unsupported_image) != OK, "Write can't be performed with usupported Image format.")
 	
 	assert(QOI.encode(good_image).size() != 0, "Encode correct Image must be performed.")
@@ -104,9 +104,9 @@ func test_api():
 	#################
 	### qoi_save
 	
-	@warning_ignore(return_value_discarded)
+	@warning_ignore("return_value_discarded")
 	ResourceSaver.save(image_to_test_save, test_dir.path_join("1x1_img.qoi"))
-	@warning_ignore(return_value_discarded)
+	@warning_ignore("return_value_discarded")
 	ResourceSaver.save(tex_to_test_save, test_dir.path_join("1x1_tex.qoi"))
 	assert(QOI.read(test_dir.path_join("1x1_img.qoi")), "Image must be saved to QOI via ResourceSaver and loaded correctly.")
 	assert(QOI.read(test_dir.path_join("1x1_tex.qoi")), "Texture must be saved to QOI via ResourceSaver and loaded correctly.")
@@ -178,7 +178,7 @@ func start_bench():
 
 func render_images():
 	var fin_dir = img_dir.path_join("%dx%d_%d" % [image_width, image_height, frames_to_render])
-	@warning_ignore(return_value_discarded)
+	@warning_ignore("return_value_discarded")
 	DirAccess.make_dir_recursive_absolute(fin_dir)
 	
 	$ViewportContainer/Viewport.size = Vector2(image_width, image_height)
@@ -195,9 +195,9 @@ func render_images():
 	for i in frames_to_render:
 		# save png and qoi for tests
 		var format = "%d.%s"
-		@warning_ignore(return_value_discarded)
+		@warning_ignore("return_value_discarded")
 		tex.get_image().save_png(fin_dir.path_join(format % [i, "png"]))
-		@warning_ignore(return_value_discarded)
+		@warning_ignore("return_value_discarded")
 		QOI.write(fin_dir.path_join(format % [i, "qoi"]), tex.get_image())
 		await get_tree().process_frame
 		print("%d/%d" % [i+1, frames_to_render])
@@ -220,7 +220,7 @@ func fill_grid(path, ext):
 	
 	var dir = DirAccess.open(path)
 	if dir:
-		@warning_ignore(return_value_discarded)
+		@warning_ignore("return_value_discarded")
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
 		while file_name != "":

@@ -106,7 +106,7 @@ jobs:
           arch: ${{matrix.arch}}
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
           artifact: macos
-          additional: lto=yes
+          additional: lto=yes macos_deployment_target=10.14
 
   # ============================================
 

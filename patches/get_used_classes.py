@@ -39,21 +39,39 @@ def extract_used_classes(folder_path: str):
     found_classes = set()
 
     def scan(scan_path):
+        skips = 0
         for dir, subdirs, files in os.walk(scan_path):
             for f in files:
                 if not f.endswith((".cpp", ".cxx", ".c++", ".c", ".cc", ".inc", ".hpp", ".hxx", ".h", ".hh")):
                     continue
 
-                with open(Path(dir) / f, "r") as file:
+                def read_data(opened_file):
                     data = file.read()
 
                     matches = find_class.finditer(data)
                     for matchNum, match in enumerate(matches, start=1):
                         found_classes.add(match.group(1))
 
-    scan(godot_cpp_src)
-    scan(godot_cpp_include)
-    scan(folder_path)
+                try:
+                    with open(Path(dir) / f, "r") as file:
+                        read_data(file)
+                except UnicodeDecodeError:
+                    try:
+                        with open(Path(dir) / f, "r", encoding="utf-8") as file:
+                            read_data(file)
+                    except UnicodeDecodeError as e:
+                        print("Skipping file due to 'UnicodeDecodeError' exception: " + (Path(dir) / f).resolve().as_posix() + "\nException: " + str(e))
+                        skips += 1
+                        continue
+        return skips
+
+    skips = 0
+    skips += scan(godot_cpp_src)
+    skips += scan(godot_cpp_include)
+    skips += scan(folder_path)
+
+    if skips > 0:
+        print()
 
     # generate array of class names
     return ["".join([w.title() for w in c.split("_")]) for c in found_classes]
@@ -72,7 +90,10 @@ def scan_dependencies(api):
 
     print("Provided", len(used_classes),
           "explicit classes:", str(sorted(used_classes)))
-    print("A total of", len(found_dependencies), "classes were found:", str(sorted(found_dependencies)))
+    print()
+    print("A total of", len(found_dependencies),
+          "classes were found:", str(sorted(found_dependencies)))
+    print()
 
     temp_engine_class_names.clear()
 
@@ -133,9 +154,9 @@ def delete_useless(files):
         c) + ".cpp" for c in found_dependencies]
 
     src_path = "gen/src/classes/"
-    print()
     print("These", len(dependencies_file_names), "files from the",
           src_path, "directory will be compiled:", dependencies_file_names)
+    print()
 
     new_files_list = []
     for f in files:

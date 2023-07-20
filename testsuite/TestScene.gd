@@ -181,7 +181,7 @@ func render_images():
 	@warning_ignore("return_value_discarded")
 	DirAccess.make_dir_recursive_absolute(fin_dir)
 	
-	$ViewportContainer/Viewport.size = Vector2(image_width, image_height)
+	$ViewportContainer.size = Vector2(image_width, image_height)
 	$ViewportContainer/Viewport/TextureRect.size = Vector2(image_width, image_height)
 	
 	$ViewportContainer/Viewport/AnimationPlayer.stop()
@@ -205,7 +205,7 @@ func render_images():
 		if Input.is_key_pressed(KEY_ESCAPE):
 			break
 	
-	$ViewportContainer/Viewport.size = Vector2(128, 128)
+	$ViewportContainer.size = Vector2(128, 128)
 	$ViewportContainer/Viewport/TextureRect.size = Vector2(128, 128)
 	$ViewportContainer/Viewport/AnimationPlayer.stop()
 

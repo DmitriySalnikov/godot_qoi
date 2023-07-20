@@ -14,7 +14,7 @@ Ref<QOIImport> qoi_import_plugin;
 Ref<QOIResourceSaver> qoi_resource_saver;
 
 /** GDExtension Initialize **/
-extern "C" void GDE_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
+void GDE_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
@@ -53,7 +53,7 @@ extern "C" void GDE_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel
 }
 
 /** GDExtension Uninitialize **/
-extern "C" void GDE_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLevel p_level) {
+void GDE_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLevel p_level) {
 	if (qoi_import_plugin.is_valid())
 		qoi_import_plugin->remove_format_loader();
 	qoi_import_plugin.unref();
@@ -65,8 +65,8 @@ extern "C" void GDE_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLev
 
 /** GDExtension Initialize **/
 extern "C" {
-GDExtensionBool GDE_EXPORT godot_qoi_library_init(const GDExtensionInterface *p_interface, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
-	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
+GDExtensionBool GDE_EXPORT godot_qoi_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+	godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
 	init_obj.register_initializer(initialize_godot_qoi_module);
 	init_obj.register_terminator(uninitialize_godot_qoi_module);

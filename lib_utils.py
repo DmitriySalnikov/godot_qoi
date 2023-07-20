@@ -21,7 +21,7 @@ def setup_options(env, arguments, gen_help):
     gen_help(env, opts)
 
 
-def gdnative_setup_defines_and_flags(env):
+def setup_defines_and_flags(env):
     env.Append(CPPDEFINES=["GDEXTENSION_LIBRARY"])
 
     if env["lto"]:
@@ -34,17 +34,17 @@ def gdnative_setup_defines_and_flags(env):
             env.AppendUnique(LINKFLAGS=["-flto"])
 
 
-def gdnative_get_sources(src):
+def get_sources(src):
     res = [src_folder + "/" + file for file in src]
     res = unity_tools.generate_unity_build(res, "qoi_")
 
     return res
 
 
-def gdnative_get_library_object(env, arguments=None, gen_help=None):
+def get_library_object(env, arguments=None, gen_help=None):
     if arguments != None and gen_help:
         setup_options(env, arguments, gen_help)
-    gdnative_setup_defines_and_flags(env)
+    setup_defines_and_flags(env)
 
     env.Append(CPPPATH=[src_folder])
 
@@ -63,7 +63,7 @@ def gdnative_get_library_object(env, arguments=None, gen_help=None):
 
     env.Default(env.SharedLibrary(
         target=env.File(Path(env["addon_output_dir"]) / library_full_name),
-        source=gdnative_get_sources(src),
+        source=get_sources(src),
         SHLIBSUFFIX=env["SHLIBSUFFIX"]
     ))
 

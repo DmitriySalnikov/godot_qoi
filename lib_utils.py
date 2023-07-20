@@ -36,7 +36,7 @@ def gdnative_setup_defines_and_flags(env):
 
 def gdnative_get_sources(src):
     res = [src_folder + "/" + file for file in src]
-    res = unity_tools.generate_unity_build(res, "dd3d_")
+    res = unity_tools.generate_unity_build(res, "qoi_")
 
     return res
 

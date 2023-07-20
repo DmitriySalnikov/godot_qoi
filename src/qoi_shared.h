@@ -19,7 +19,7 @@
 #pragma warning(default : 4244)
 #endif
 
-#define TEXT(t) #t
+#define NAMEOF(t) #t
 
 #define REG_METHOD(name) ClassDB::bind_method(D_METHOD(#name), &REG_CLASS_NAME::name)
 #define REG_METHOD_ARGS(name, ...) ClassDB::bind_method(D_METHOD(#name, __VA_ARGS__), &REG_CLASS_NAME::name)

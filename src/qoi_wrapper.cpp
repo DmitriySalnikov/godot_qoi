@@ -8,10 +8,10 @@
 using namespace godot;
 
 void QOI::_bind_methods() {
-	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(write), "path", "image"), &QOI::write);
-	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(encode), "image"), &QOI::encode);
-	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(read), "path"), &QOI::read);
-	ClassDB::bind_static_method(TEXT(QOI), D_METHOD(TEXT(decode), "data"), &QOI::decode);
+	ClassDB::bind_static_method(NAMEOF(QOI), D_METHOD(NAMEOF(write), "path", "image"), &QOI::write);
+	ClassDB::bind_static_method(NAMEOF(QOI), D_METHOD(NAMEOF(encode), "image"), &QOI::encode);
+	ClassDB::bind_static_method(NAMEOF(QOI), D_METHOD(NAMEOF(read), "path"), &QOI::read);
+	ClassDB::bind_static_method(NAMEOF(QOI), D_METHOD(NAMEOF(decode), "data"), &QOI::decode);
 }
 
 Ref<Image> QOI::read(String path) {

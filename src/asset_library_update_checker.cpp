@@ -20,6 +20,8 @@
 #pragma warning(default : 4244)
 #endif
 
+using namespace godot;
+
 void AssetLibraryUpdateChecker::_bind_methods() {
 #define REG_CLASS_NAME AssetLibraryUpdateChecker
 
@@ -68,7 +70,7 @@ void AssetLibraryUpdateChecker::init() {
 	request = memnew(HTTPRequest);
 	SCENE_ROOT()->add_child(request);
 
-	request->connect("request_completed", Callable(this, TEXT(request_completed)));
+	request->connect("request_completed", Callable(this, NAMEOF(request_completed)));
 	request->request("https://godotengine.org/asset-library/api/asset/1619");
 }
 
@@ -81,7 +83,7 @@ AssetLibraryUpdateChecker::AssetLibraryUpdateChecker() {
 	DEFINE_SETTING_AND_GET(bool check_updates, root_settings_section + "check_for_updates", true, Variant::BOOL);
 
 	if (check_updates)
-		call_deferred(TEXT(init));
+		call_deferred(NAMEOF(init));
 }
 
 #endif

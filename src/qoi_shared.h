@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined(_MSC_VER)
-#pragma warning(disable : 4244)
+#pragma warning(disable : 4244 4267)
 #endif
 
 #include <godot_cpp/classes/ref.hpp>
@@ -16,7 +16,7 @@
 #include <godot_cpp/classes/image.hpp>
 
 #if defined(_MSC_VER)
-#pragma warning(default : 4244)
+#pragma warning(default : 4244 4267)
 #endif
 
 #define NAMEOF(t) #t

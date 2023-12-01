@@ -1,13 +1,15 @@
 /* register_types.cpp */
 
+#include "compiler.h"
 #include "qoi_import.h"
 #include "qoi_save.h"
 #include "qoi_wrapper.h"
 
 #include "qoi_shared.h"
 
+GODOT_WARNING_DISABLE()
 #include <godot_cpp/classes/project_settings.hpp>
-
+GODOT_WARNING_RESTORE()
 using namespace godot;
 
 Ref<QOIImport> qoi_import_plugin;

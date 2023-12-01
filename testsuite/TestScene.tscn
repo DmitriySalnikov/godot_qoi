@@ -12,7 +12,7 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TextureRect:material:shader_param/offset")
+tracks/0/path = NodePath("TextureRect:material:shader_parameter/offset")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -27,7 +27,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TextureRect:material:shader_param/offset")
+tracks/0/path = NodePath("TextureRect:material:shader_parameter/offset")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -43,37 +43,32 @@ _data = {
 "RESET": SubResource("7")
 }
 
-[sub_resource type="Shader" id="3"]
+[sub_resource type="Shader" id="Shader_4s8l6"]
 code = "shader_type canvas_item;
 
-uniform sampler2D noise : repeat_enable;
 uniform vec2 offset = vec2(0,0);
 
 void fragment(){
+	COLOR.rgb = texture(TEXTURE, fract(UV.rg + offset)).rgb;
 	COLOR.a = 1.0f;
-	COLOR.rgb = texture(noise, UV.rg + offset).rgb;
 }"
 
-[sub_resource type="FastNoiseLite" id="5"]
-noise_type = 3
-seed = 1
-frequency = 0.005
-fractal_type = 0
-
-[sub_resource type="NoiseTexture2D" id="6"]
-width = 1024
-height = 1024
-generate_mipmaps = false
-noise = SubResource("5")
-
-[sub_resource type="ShaderMaterial" id="4"]
-shader = SubResource("3")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i4tf8"]
+shader = SubResource("Shader_4s8l6")
 shader_parameter/offset = Vector2(0, 0)
-shader_parameter/noise = SubResource("6")
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1tydc"]
+[sub_resource type="Gradient" id="Gradient_h5b4i"]
+offsets = PackedFloat32Array(0, 0.512077, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.278431, 0.54902, 0.74902, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_84mph"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_rof67"]
 width = 64
 height = 64
+seamless_blend_skirt = 0.28
+color_ramp = SubResource("Gradient_h5b4i")
+noise = SubResource("FastNoiseLite_84mph")
 
 [node name="TestQOI" type="Control"]
 layout_mode = 3
@@ -115,17 +110,10 @@ libraries = {
 }
 
 [node name="TextureRect" type="TextureRect" parent="ViewportContainer/Viewport"]
-texture_repeat = 2
-material = SubResource("4")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -64.0
-offset_bottom = -64.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("NoiseTexture2D_1tydc")
-metadata/_edit_use_anchors_ = true
+material = SubResource("ShaderMaterial_i4tf8")
+offset_right = 128.0
+offset_bottom = 128.0
+texture = SubResource("NoiseTexture2D_rof67")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 1

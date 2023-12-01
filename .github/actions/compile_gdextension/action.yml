@@ -2,23 +2,30 @@ name: Build GDExtension
 description: Build GDExtension library
 inputs:
   platform:
-    description: Target platform (linux|macos|windows|android|ios|javascript)
+    description: Target platform (linux|macos|windows|android|ios|web)
     required: true
   target:
     description: Compilation target (editor|template_release|template_debug)
+    required: true
     default: "release"
   arch:
     description: Arch (universal|x86_32|x86_64|arm32|arm64|rv64|ppc32|ppc64|wasm32)
+    required: true
     default: ""
+  output_libs_path:
+    description: Path to compiled libraries
+    required: true
+    default: "bin"
+  use_cache:
+    description: Use cache
+    default: "true"
+  artifact:
+    description: Artifact name
+    required: true
+    default: "bin"
   additional:
     description: Any additional arguments
     default: ""
-  artifact:
-    description: Artifact name
-    default: "bin"
-  output_libs_path:
-    description: Path to compiled libraries
-    default: "bin"
 runs:
   using: "composite"
   steps:
@@ -29,6 +36,7 @@ runs:
         echo "sha=$(git rev-parse @:./godot-cpp)" >> $GITHUB_OUTPUT
 
     - name: Restore .scons_cache directory
+      if: inputs.use_cache != 'false'
       uses: actions/cache/restore@v3
       with:
         path: ${{env.SCONS_CACHE}}
@@ -68,15 +76,15 @@ runs:
       run: |
         echo "::group::🛠️ GDExtesion Compilation 🛠️"
         cd godot-cpp
+        git apply --ignore-space-change --ignore-whitespace ../patches/visibilty_hidden.patch
         git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_exclude_unused_classes.patch
         git apply --ignore-space-change --ignore-whitespace ../patches/unity_build.patch
-        git apply --ignore-space-change --ignore-whitespace ../patches/1165.patch
         cd ..
         scons platform=${{inputs.platform}} arch=${{inputs.arch}} target=${{inputs.target}} addon_output_dir=${{inputs.output_libs_path}} ${{inputs.additional}}
         echo "::endgroup::"
 
     - name: Prepare artifact Unix
-      if: runner.os != 'Windows' && inputs.platform != 'android'
+      if: runner.os != 'Windows' && inputs.platform != 'android' && inputs.platform != 'web'
       shell: bash
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
@@ -99,6 +107,7 @@ runs:
         path: ${{inputs.output_libs_path}}/*
 
     - name: Save .scons_cache directory
+      if: inputs.use_cache != 'false'
       uses: actions/cache/save@v3
       with:
         path: ${{env.SCONS_CACHE}}

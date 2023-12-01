@@ -1,15 +1,9 @@
 #include "qoi_save.h"
 #include "qoi_wrapper.h"
 
-#if defined(_MSC_VER)
-#pragma warning(disable : 4244)
-#endif
-
+GODOT_WARNING_DISABLE()
 #include <godot_cpp/classes/texture2d.hpp>
-
-#if defined(_MSC_VER)
-#pragma warning(default : 4244)
-#endif
+GODOT_WARNING_RESTORE()
 
 Error QOIResourceSaver::_save(const Ref<Resource> &resource, const String &path, uint32_t flags) {
 	{

@@ -1,28 +1,33 @@
 [configuration]
 
 entry_symbol = "godot_qoi_library_init"
-compatibility_minimum = "4.1"
+compatibility_minimum = "4.1.3"
+reloadable = false
 
 [dependencies]
 
 # example.x86_64 = { "relative or absolute path to the dependency" : "the path relative to the exported project", }
 
-# macos.editor = { }
-# windows.editor.x86_64 = { }
-# linux.editor.x86_64 = { }
+# debug
 
 macos = { }
 windows.x86_64 = { }
 linux.x86_64 = { }
+
+web.wasm32 = {}
 
 android.arm32 = { }
 android.arm64 = { }
 android.x86_32 = { }
 android.x86_64 = { }
 
+# release
+
 macos.template_release = { }
 windows.template_release.x86_64 = { }
 linux.template_release.x86_64 = { }
+
+web.template_release.wasm32 = { }
 
 android.template_release.arm32 = { }
 android.template_release.arm64 = { }
@@ -31,22 +36,26 @@ android.template_release.x86_64 = { }
 
 [libraries]
 
-# macos.editor = "libs/libgodot_qoi.macos.editor.universal.dylib"
-# windows.editor.x86_64 = "libs/libgodot_qoi.windows.editor.x86_64.dll"
-# linux.editor.x86_64 = "libs/libgodot_qoi.linux.editor.x86_64.so"
+# debug
 
 macos = "libs/libgodot_qoi.macos.template_debug.universal.dylib"
 windows.x86_64 = "libs/libgodot_qoi.windows.template_debug.x86_64.dll"
 linux.x86_64 = "libs/libgodot_qoi.linux.template_debug.x86_64.so"
+
+web.wasm32 = "libs/libgodot_qoi.web.template_debug.wasm32.wasm"
 
 android.arm32 = "libs/libgodot_qoi.android.template_debug.arm32.so"
 android.arm64 = "libs/libgodot_qoi.android.template_debug.arm64.so"
 android.x86_32 = "libs/libgodot_qoi.android.template_debug.x86_32.so"
 android.x86_64 = "libs/libgodot_qoi.android.template_debug.x86_64.so"
 
+# release
+
 macos.template_release = "libs/libgodot_qoi.macos.template_release.universal.dylib"
 windows.template_release.x86_64 = "libs/libgodot_qoi.windows.template_release.x86_64.dll"
 linux.template_release.x86_64 = "libs/libgodot_qoi.linux.template_release.x86_64.so"
+
+web.template_release.wasm32 = "libs/libgodot_qoi.web.template_release.wasm32.wasm"
 
 android.template_release.arm32 = "libs/libgodot_qoi.android.template_release.arm32.so"
 android.template_release.arm64 = "libs/libgodot_qoi.android.template_release.arm64.so"

@@ -1,9 +1,10 @@
 #pragma once
 
-#if defined(_MSC_VER)
-#pragma warning(disable : 4244 4267)
-#endif
+#include "compiler.h"
+#include "profiler.h"
 
+GODOT_WARNING_DISABLE()
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/error_macros.hpp>
@@ -14,19 +15,31 @@
 
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/image.hpp>
-
-#if defined(_MSC_VER)
-#pragma warning(default : 4244 4267)
-#endif
-
-#define NAMEOF(t) #t
+GODOT_WARNING_RESTORE()
 
 #define REG_METHOD(name) ClassDB::bind_method(D_METHOD(#name), &REG_CLASS_NAME::name)
 #define REG_METHOD_ARGS(name, ...) ClassDB::bind_method(D_METHOD(#name, __VA_ARGS__), &REG_CLASS_NAME::name)
 
-#define PRINT(text) godot::UtilityFunctions::print(godot::Variant(text))
-#define PRINT_ERROR(text) godot::_err_print_error(__FUNCTION__, godot::get_file_name_in_repository(__FILE__).utf8().get_data(), __LINE__, godot::Variant(text).stringify())
-#define PRINT_WARNING(text) godot::_err_print_error(__FUNCTION__, godot::get_file_name_in_repository(__FILE__).utf8().get_data(), __LINE__, godot::Variant(text).stringify(), false, true)
+#if DEV_ENABLED
+#define DEV_PRINT(text, ...) godot::UtilityFunctions::print(FMT_STR(godot::Variant(text), ##__VA_ARGS__))
+#define DEV_PRINT_STD(format, ...) Utils::_logv(false, false, format, ##__VA_ARGS__)
+// Forced
+#define DEV_PRINT_STD_F(format, ...) Utils::_logv(false, true, format, ##__VA_ARGS__)
+#define DEV_PRINT_STD_ERR(format, ...) Utils::_logv(true, false, format, ##__VA_ARGS__)
+// Forced
+#define DEV_PRINT_STD_ERR_F(format, ...) Utils::_logv(true, true, format, ##__VA_ARGS__)
+#else
+#define DEV_PRINT(text, ...)
+#define DEV_PRINT_STD(format, ...)
+#define DEV_PRINT_STD_F(format, ...)
+#define DEV_PRINT_STD_ERR(format, ...)
+#define DEV_PRINT_STD_ERR_F(format, ...)
+#endif
+
+#define FMT_STR(str, ...) String(str).format(Array::make(__VA_ARGS__))
+#define PRINT(text, ...) godot::UtilityFunctions::print(FMT_STR(godot::Variant(text), ##__VA_ARGS__))
+#define PRINT_ERROR(text, ...) godot::_err_print_error(__FUNCTION__, godot::get_file_name_in_repository(__FILE__).utf8().get_data(), __LINE__, FMT_STR(godot::Variant(text).stringify(), ##__VA_ARGS__))
+#define PRINT_WARNING(text, ...) godot::_err_print_error(__FUNCTION__, godot::get_file_name_in_repository(__FILE__).utf8().get_data(), __LINE__, FMT_STR(godot::Variant(text).stringify(), ##__VA_ARGS__), false, true)
 
 namespace godot {
 static String get_file_name_in_repository(const String &name) {

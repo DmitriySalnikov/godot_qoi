@@ -1,15 +1,10 @@
 #pragma once
 
-#if defined(_MSC_VER)
-#pragma warning(disable : 4244)
-#endif
+#include "compiler.h"
 
+GODOT_WARNING_DISABLE()
 #include <godot_cpp/classes/image_format_loader_extension.hpp>
-
-#if defined(_MSC_VER)
-#pragma warning(default : 4244)
-#endif
-
+GODOT_WARNING_RESTORE()
 using namespace godot;
 
 class QOIImport : public ImageFormatLoaderExtension {

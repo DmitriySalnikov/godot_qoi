@@ -237,6 +237,10 @@ func fill_grid(path, ext, use_native_loader = false):
 		while file_name != "":
 			if not dir.current_is_dir():
 				if file_name.ends_with(ext + ".import" if OS.has_feature("template") else ext):
+					# override native loader
+					if not ProjectSettings.get_setting("rendering/textures/qoi/enable_qoi_importer", false) and not file_name.ends_with(ext + ".import"):
+						use_native_loader = true
+					
 					var tmp = TextureRect.new()
 					if use_native_loader:
 						if ext == "qoi":

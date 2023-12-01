@@ -4,7 +4,7 @@ extends Control
 const img_dir = "res://testsuite/images/"
 @export var run_tests = false
 @export var run_benchmark = true
-@export_range(0, 256) var bench_runs := 5
+@export_range(0, 256) var bench_runs := 4
 @export_range(1, 256) var frames_to_render := 99
 @export_range(1, 8192) var image_width := 1920
 @export_range(1, 8192) var image_height := 1080
@@ -116,12 +116,22 @@ func start_bench():
 	var result = {}
 	var dir = img_dir.path_join("%dx%d_%d" % [image_width, image_height, frames_to_render])
 	
-	for ext in ["png", "qoi"]:
+	for ext in ["png", "png_native", "qoi", "qoi_native"]:
 		result[ext] = []
+		
+		var use_native_loader = false
+		if ext.ends_with("_native"):
+			if not OS.has_feature("editor"):
+				continue
+			
+			use_native_loader = true
 		
 		for i in bench_runs:
 			var start_time = Time.get_ticks_usec()
-			fill_grid(dir, ext)
+			if use_native_loader:
+				fill_grid(dir, ext.replace("_native", ""), true)
+			else:
+				fill_grid(dir, ext)
 			var time = Time.get_ticks_usec() - start_time
 			result[ext].append(time)
 			print("Run: %d, Ext: %s, %.3f ms" % [i, ext, time / 1000.0])
@@ -156,23 +166,23 @@ func start_bench():
 	
 	var is_webp
 	var is_lossy
-	if ProjectSettings.has_setting("rendering/misc/lossless_compression/force_png"):
+	if ProjectSettings.has_setting("rendering/textures/lossless_compression/force_png"):
 		is_lossy = ProjectSettings.has_setting("importer_defaults/texture") && ProjectSettings.get_setting("importer_defaults/texture")["compress/mode"] == 1
-		is_webp = !ProjectSettings.get_setting("rendering/misc/lossless_compression/force_png") || is_lossy
+		is_webp = !ProjectSettings.get_setting("rendering/textures/lossless_compression/force_png") || is_lossy
 	
 	if is_vram:
-		print("Note 'importer_defaults/texture[compress/mode]' is not equal to 0. PNG was imported as VRAM compressed texture inside .import folder")
+		print("Note 'importer_defaults/texture[compress/mode]' is not equal to 0. PNG and QOI was imported as VRAM compressed texture inside .import folder")
 	else:
 		if is_webp:
-			print("Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG was imported as WebP inside .import folder")
+			print("Note 'rendering/misc/lossless_compression/force_png' is off or 'importer_defaults/texture[compress/mode]' is lossy. PNG and QOI was imported as WebP inside .import folder")
 	
 	print("Platform: %s" % OS.get_name())
 	print("Avg for %d runs, with %dx%d %d frames" % [bench_runs, image_width, image_height, frames_to_render])
-	for ext in ["png", "qoi"]:
+	for ext in ["png", "png_native", "qoi", "qoi_native"]:
 		var sum = 0
 		for t in result[ext]:
 			sum += t
-		var e = ext if ext != "png" else (vram_format if is_vram else (("webp lossy" if is_lossy else "webp") if is_webp else "png" ))
+		var e = ext if ext not in ["png", "qoi"] else (vram_format if is_vram else (("webp lossy" if is_lossy else ext + "_webp") if is_webp else ext + "_png" ))
 		print("%s:\t%.3f ms" % [e, (sum / float(result[ext].size())) / 1000.0])
 
 
@@ -211,7 +221,8 @@ func render_images():
 
 
 var is_printed_count_once := []
-func fill_grid(path, ext):
+
+func fill_grid(path, ext, use_native_loader = false):
 	var ch = grid.get_children()
 	for c in ch:
 		c.queue_free()
@@ -227,7 +238,13 @@ func fill_grid(path, ext):
 			if not dir.current_is_dir():
 				if file_name.ends_with(ext + ".import" if OS.has_feature("template") else ext):
 					var tmp = TextureRect.new()
-					tmp.texture = load(path.path_join(file_name.replace(".import", "")))
+					if use_native_loader:
+						if ext == "qoi":
+							tmp.texture = ImageTexture.create_from_image(QOI.read(path.path_join(file_name.replace(".import", ""))))
+						else:
+							tmp.texture = ImageTexture.create_from_image(Image.load_from_file(path.path_join(file_name.replace(".import", ""))))
+					else:
+						tmp.texture = load(path.path_join(file_name.replace(".import", "")))
 					tmp.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 					tmp.size_flags_horizontal = SIZE_EXPAND_FILL
 					tmp.size_flags_vertical = SIZE_EXPAND_FILL

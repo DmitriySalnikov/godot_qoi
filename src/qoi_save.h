@@ -1,16 +1,11 @@
 #pragma once
 
-#if defined(_MSC_VER)
-#pragma warning(disable : 4244)
-#endif
+#include "compiler.h"
 
+GODOT_WARNING_DISABLE()
 #include <godot_cpp/classes/resource_format_saver.hpp>
 #include <godot_cpp/classes/resource_saver.hpp>
-
-#if defined(_MSC_VER)
-#pragma warning(default : 4244)
-#endif
-
+GODOT_WARNING_RESTORE()
 using namespace godot;
 
 class QOIResourceSaver : public ResourceFormatSaver {

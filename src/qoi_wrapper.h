@@ -1,5 +1,6 @@
 #pragma once
 
+#include "compiler.h"
 #include "qoi_shared.h"
 
 using namespace godot;

@@ -1,16 +1,15 @@
 name: 🛠️ GDExtension Build
 on:
   push:
-    paths:
-      [
-        src/**,
-        .github/**,
-        "!.github/**/util_*",
-        "patches/**",
-        lib_utils.py,
-        SConstruct,
-      ]
+    paths: [src/**, .github/**, "!.github/**/util_*", "patches/**", lib_utils.py, SConstruct]
+  pull_request:
+    paths: [src/**, .github/**, "!.github/**/util_*", "patches/**", lib_utils.py, SConstruct]
   workflow_dispatch:
+    inputs:
+      use_cache:
+        description: Use Cache
+        default: true
+        type: boolean
   repository_dispatch:
 
 # Stop the same workflow actions
@@ -48,6 +47,7 @@ jobs:
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{format('{0}', inputs.use_cache)}} # Cast to string
           artifact: windows
           additional: lto=yes
 
@@ -77,6 +77,7 @@ jobs:
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{format('{0}', inputs.use_cache)}}
           artifact: linux
           additional: lto=yes
 
@@ -106,6 +107,7 @@ jobs:
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{format('{0}', inputs.use_cache)}}
           artifact: macos
           additional: lto=yes macos_deployment_target=10.14
 
@@ -121,15 +123,32 @@ jobs:
         arch: [arm32, arm64, x86_32, x86_64]
         target: [template_debug, template_release]
 
-    env:
-      ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/23.2.8568313
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
           submodules: recursive
+
+      - name: Install Android NDK r23c
+        uses: nttld/setup-ndk@v1.4.1
+        id: setup-ndk
+        with:
+          ndk-version: r23c
+          link-to-sdk: true
+          local-cache: true
+
+      # TODO revisit after some updates of nttld/setup-ndk
+      - name: Restore Android Symlinks
+        run: |
+          directory="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+
+          find "$directory" -type l | while read link; do
+              current_target=$(readlink "$link")
+              new_target="$directory/$(basename "$current_target")"
+              ln -sf "$new_target" "$link"
+              echo "Changed $(basename "$link") from $current_target to $new_target"
+          done
 
       - name: Compile GDExtension
         uses: ./.github/actions/compile_gdextension
@@ -138,7 +157,45 @@ jobs:
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{format('{0}', inputs.use_cache)}}
           artifact: android
+          additional: lto=yes
+
+  # ============================================
+
+  web-gdextension:
+    name: 🕸 Web
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [wasm32]
+        target: [template_debug, template_release]
+
+    env:
+      EM_VERSION: 3.1.39
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: recursive
+
+      - uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: ${{env.EM_VERSION}}
+
+      - name: Compile GDExtension
+        uses: ./.github/actions/compile_gdextension
+        with:
+          platform: web
+          target: ${{matrix.target}}
+          arch: ${{matrix.arch}}
+          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{format('{0}', inputs.use_cache)}}
+          artifact: web
           additional: lto=yes
 
   # ============================================
@@ -150,6 +207,7 @@ jobs:
         linux-gdextension,
         macos-gdextension,
         android-gdextension,
+        web-gdextension,
       ]
     name: 📦 Collect GDExtension binaries
     runs-on: ubuntu-latest
@@ -159,6 +217,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: extracted_files
+
+      - name: Remove `gdextension_libs` if the action was restarted
+        run: |
+          rm -rf extracted_files/gdextension_libs/
 
       - name: Store all libraries in one directory
         run: |

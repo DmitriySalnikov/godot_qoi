@@ -25,7 +25,6 @@ __pycache__
 *.264
 *.exp
 *.lib
-*.vcxproj.filters
 *.vcxproj.user
 *.os
 *.out

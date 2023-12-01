@@ -4,14 +4,14 @@
 
 QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) integration for Godot Engine 4.x.
 
-This is a GDExtension library. Includes precompiled binaries for `Windows`, `Linux`, `macOS` and `Android`, but it must compile for each platform which Godot Engine supports.
+This is a GDExtension library. Includes precompiled binaries for `Windows`, `Linux`, `macOS`, `Android` and `Web`, but it must compile for each platform which Godot Engine supports.
 
 [Godot 3 version](https://github.com/DmitriySalnikov/godot_qoi/tree/godot_3)
 
 ## Features
 
-* Fastest encoding and fast decoding (when working with the QOI class)
-* Editor integration (use .qoi like regular textures)
+* Fastest encoding and fast decoding (when working with the QOI class in scripts)
+* Editor integration (use `.qoi` as regular textures)
 * Cross-platform
 * Simple API
 

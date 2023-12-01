@@ -1,4 +1,4 @@
-<img src="https://github.com/DmitriySalnikov/godot_qoi/blob/5bd25a2dc2ea907041b4c9a7f4ae12bc0ae19a94/icon.png" width=128/>
+<img src="https://github.com/DmitriySalnikov/godot_qoi/blob/5bd25a2dc2ea907041b4c9a7f4ae12bc0ae19a94/icon.png?raw=true" width=128/>
 
 # godot_qoi
 
@@ -25,11 +25,9 @@ https://user-images.githubusercontent.com/7782218/152955097-285f81dc-2b65-4f80-b
 
 ## Support
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I2I53VZ2D)
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/dmitriysalnikov)
-
 [<img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/QIWI_logo.svg" alt="qiwi" width=90px/>](https://qiwi.com/n/DMITRIYSALNIKOV)
+
+[<img src="https://static.boosty.to/assets/images/boostyDomainLogo.5Vlxt.svg" alt="Boosty" width=120px/>](https://boosty.to/dmitriysalnikov/donate)
 
 ## Download
 

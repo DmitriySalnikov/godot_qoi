@@ -32,8 +32,12 @@ __pycache__
 used_classes.json
 
 .import/
+.godot/
 .mono/
 obj/
 bin/
 /libs/
 testsuite/images/
+testproject/addons/
+testproject/testsuite/
+SUCCESS

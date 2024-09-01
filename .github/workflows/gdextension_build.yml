@@ -1,31 +1,56 @@
 name: 🛠️ GDExtension Build
 on:
   push:
-    paths: [src/**, .github/**, "!.github/**/util_*", "patches/**", lib_utils.py, SConstruct]
+    paths:
+      [
+        src/**,
+        .github/**,
+        "!.github/**/util_*",
+        "patches/**",
+        lib_utils.py,
+        SConstruct,
+      ]
   pull_request:
-    paths: [src/**, .github/**, "!.github/**/util_*", "patches/**", lib_utils.py, SConstruct]
+    paths:
+      [
+        src/**,
+        .github/**,
+        "!.github/**/util_*",
+        "patches/**",
+        lib_utils.py,
+        SConstruct,
+      ]
   workflow_dispatch:
     inputs:
+      production_build:
+        description: Production build
+        default: true
+        type: boolean
       use_cache:
         description: Use Cache
         default: true
         type: boolean
-  repository_dispatch:
 
 # Stop the same workflow actions
 concurrency:
-  group: ${{github.workflow}}-${{github.event.pull_request.number || github.run_id}}
+  group: ${{github.workflow}}-${{github.event.pull_request.number || github.ref}}-${{inputs.production_build}}
   cancel-in-progress: true
+
+permissions:
+  actions: write
 
 env:
   SCONS_CACHE: ${{github.workspace}}/.scons-cache/
+  USE_CACHE: ${{!format('{0}', inputs.use_cache) && 'true' || format('{0}', inputs.use_cache)}} # Default true
+  PRODUCTION_BUILD: ${{!format('{0}', inputs.production_build) && 'false' || format('{0}', inputs.production_build)}} # Default false
   OUTPUT_LIBS_PATH: bin
   FORCE_DISABLE_UNITY: yes
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   windows-gdextension:
     name: 🏁 Windows
-    runs-on: "windows-latest"
+    runs-on: windows-latest
 
     strategy:
       fail-fast: false
@@ -35,9 +60,8 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          lfs: true
           submodules: recursive
 
       - name: Compile GDExtension
@@ -46,16 +70,17 @@ jobs:
           platform: windows
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
-          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
-          use_cache: ${{format('{0}', inputs.use_cache)}} # Cast to string
-          artifact: windows
+          artifact: windows.${{matrix.target}}.${{matrix.arch}}
           additional: lto=yes
+          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{env.USE_CACHE}}
+          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
   linux-gdextension:
     name: 🐧 Linux
-    runs-on: "ubuntu-20.04"
+    runs-on: ubuntu-20.04
 
     strategy:
       fail-fast: false
@@ -65,9 +90,8 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          lfs: true
           submodules: recursive
 
       - name: Compile GDExtension
@@ -76,16 +100,17 @@ jobs:
           platform: linux
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
-          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
-          use_cache: ${{format('{0}', inputs.use_cache)}}
-          artifact: linux
+          artifact: linux.${{matrix.target}}.${{matrix.arch}}
           additional: lto=yes
+          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{env.USE_CACHE}}
+          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
   macos-gdextension:
     name: 🍏 MacOS
-    runs-on: "macos-latest"
+    runs-on: macos-latest
 
     strategy:
       fail-fast: false
@@ -95,9 +120,8 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          lfs: true
           submodules: recursive
 
       - name: Compile GDExtension
@@ -106,16 +130,47 @@ jobs:
           platform: macos
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
-          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
-          use_cache: ${{format('{0}', inputs.use_cache)}}
-          artifact: macos
+          artifact: macos.${{matrix.target}}.${{matrix.arch}}
           additional: lto=yes macos_deployment_target=10.14
+          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{env.USE_CACHE}}
+          token: ${{secrets.TELEMETRY_TOKEN}}
+
+  # ============================================
+
+  ios-gdextension:
+    name: 🍏 Ios
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [universal]
+        target: [template_debug, template_release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Compile GDExtension
+        uses: ./.github/actions/compile_gdextension
+        with:
+          platform: ios
+          target: ${{matrix.target}}
+          arch: ${{matrix.arch}}
+          artifact: ios.${{matrix.target}}.${{matrix.arch}}
+          additional: lto=yes
+          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{env.USE_CACHE}}
+          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
   android-gdextension:
     name: 🤖 Android
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -125,9 +180,8 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          lfs: true
           submodules: recursive
 
       - name: Install Android NDK r23c
@@ -156,36 +210,41 @@ jobs:
           platform: android
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
-          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
-          use_cache: ${{format('{0}', inputs.use_cache)}}
-          artifact: android
+          artifact: android.${{matrix.target}}.${{matrix.arch}}
           additional: lto=yes
+          output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
+          use_cache: ${{env.USE_CACHE}}
 
   # ============================================
 
   web-gdextension:
     name: 🕸 Web
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         arch: [wasm32]
         target: [template_debug, template_release]
+        threads: [yes, no]
 
     env:
-      EM_VERSION: 3.1.39
+      EM_VERSION: 3.1.64
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          lfs: true
           submodules: recursive
 
-      - uses: mymindstorm/setup-emsdk@v12
+      - name: Download Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        # Continue if failed to cache
+        # https://github.com/mymindstorm/setup-emsdk/issues/20
+        continue-on-error: true
         with:
           version: ${{env.EM_VERSION}}
+          actions-cache-folder: obj/emsdk_cache
 
       - name: Compile GDExtension
         uses: ./.github/actions/compile_gdextension
@@ -193,10 +252,10 @@ jobs:
           platform: web
           target: ${{matrix.target}}
           arch: ${{matrix.arch}}
+          artifact: web.${{matrix.target}}.${{matrix.arch}}.threads_${{matrix.threads}}
+          additional: lto=yes threads=${{matrix.threads}}
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
-          use_cache: ${{format('{0}', inputs.use_cache)}}
-          artifact: web
-          additional: lto=yes
+          use_cache: ${{env.USE_CACHE}}
 
   # ============================================
 
@@ -208,30 +267,134 @@ jobs:
         macos-gdextension,
         android-gdextension,
         web-gdextension,
+        ios-gdextension,
       ]
     name: 📦 Collect GDExtension binaries
     runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{steps.output_info.outputs.artifact_name}}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download Binaries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: extracted_files
 
-      - name: Remove `gdextension_libs` if the action was restarted
-        run: |
-          rm -rf extracted_files/gdextension_libs/
-
       - name: Store all libraries in one directory
         run: |
-          ls -R extracted_files/
+          arch_dirs=$(find extracted_files/ -mindepth 1 -maxdepth 1 -type d)
+          echo "Original structure:"
+          find extracted_files -mindepth 1
           mv -f extracted_files/**/* extracted_files
-          rm -rf extracted_files/**/
+          rm -rf $arch_dirs
+          echo "Final structure:"
+          find extracted_files -mindepth 1
           touch extracted_files/.gdignore
 
+      - name: Output file information
+        id: output_info
+        run: |
+          cd extracted_files
+          echo "Total size: $(du -ch -b | grep total | cut -f1 | awk '{printf "%.2f", $1/1048576}') MB, Total number of files: $(find . -type f | wc -l)" >> $GITHUB_STEP_SUMMARY
+
+          echo "artifact_name=${{env.PRODUCTION_BUILD == 'true' && '.gdextension_libs_production' || '.gdextension_libs'}}" >> $GITHUB_OUTPUT
+
       - name: Upload GDExtension
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: gdextension_libs
+          name: ${{steps.output_info.outputs.artifact_name}}
           retention-days: 7
+          include-hidden-files: true
           path: extracted_files/*
+
+  # ============================================
+
+  test_api_integration:
+    name: "🧪 Testing API: ${{matrix.runner-os}}, Godot-${{matrix.file_suffix}}"
+    runs-on: ${{matrix.runner-os}}
+    needs: collect-gdextension
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # sync with other jobs
+        runner-os: [ubuntu-20.04, macos-latest, windows-latest]
+        include:
+          - runner-os: ubuntu-20.04
+            file_suffix: "stable_linux.x86_64.zip"
+          - runner-os: macos-latest
+            file_suffix: "stable_macos.universal.zip"
+          - runner-os: windows-latest
+            file_suffix: "stable_win64.exe.zip"
+
+    env:
+      # Sync with container: image:
+      GODOT_VERSION: 4.2.1-stable
+      ADDON_DIR: godot_qoi
+      PROJECT_PATH: testproject
+      TESTS_PATH: testsuite
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Delete old libs folder
+        shell: bash
+        run: |
+          rm -rf addons/${{env.ADDON_DIR}}/libs
+
+      - name: Download Binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: addons/${{env.ADDON_DIR}}/libs
+          name: ${{needs.collect-gdextension.outputs.artifact_name}}
+
+      - name: Prepare Test Project
+        shell: bash
+        run: |
+          cp -r addons ${{env.PROJECT_PATH}}/addons
+          cp -r ${{env.TESTS_PATH}} ${{env.PROJECT_PATH}}/${{env.TESTS_PATH}}
+          find ${{env.PROJECT_PATH}} -mindepth 1
+
+      - name: Setup Godot
+        uses: ./.github/actions/setup_godot
+        id: setup_godot
+        with:
+          tag: ${{env.GODOT_VERSION}}
+          file_suffix: ${{matrix.file_suffix}}
+          download_export_templates: false
+          is_mono: false
+
+      - name: macOS dependencies
+        shell: bash
+        if: runner.os == 'macOS'
+        run: |
+          brew install coreutils
+          alias timeout="gtimeout"
+
+      - name: Test run
+        shell: bash --noprofile --norc -o pipefail {0}
+        run: |
+          max_attempts=3
+          current_attempt=1
+          last_exit_code=0
+
+          until [ $current_attempt -gt $max_attempts ]; do
+              current_attempt=$((current_attempt + 1))
+              timeout 2m ${{steps.setup_godot.outputs.godot}} -v -e --headless --path ${{env.PROJECT_PATH}} --quit || true
+              timeout 2m ${{steps.setup_godot.outputs.godot}} -v --headless --path ${{env.PROJECT_PATH}} res://headless_test.tscn || true
+
+              if [ ! -f "${{env.PROJECT_PATH}}/SUCCESS" ]; then
+                  echo "The file reporting success has not been created! Failed."
+                  last_exit_code=1
+              else
+                  echo "The file reporting success has been created! Success!"
+                  exit 0
+              fi
+          done
+
+          echo "The maximum number of attempts has been reached. Last error code: $?"
+          exit $last_exit_code

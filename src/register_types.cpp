@@ -4,6 +4,7 @@
 #include "qoi_import.h"
 #include "qoi_save.h"
 #include "qoi_wrapper.h"
+#include "version.h"
 
 #include "qoi_shared.h"
 
@@ -18,6 +19,10 @@ Ref<QOIResourceSaver> qoi_resource_saver;
 #ifdef DEBUG_ENABLED
 #include "asset_library_update_checker.h"
 Ref<AssetLibraryUpdateChecker> upd_checker;
+#ifdef TELEMETRY_ENABLED
+#include "my_telemetry_modules/GDExtension/usage_time_reporter.h"
+DEFINE_TELEMETRY_OBJECT_ID(gqoi_usage_obj_id);
+#endif
 #endif
 
 /** GDExtension Initialize **/
@@ -48,6 +53,10 @@ void GDE_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
 		ClassDB::register_class<AssetLibraryUpdateChecker>();
 		upd_checker.instantiate();
+
+#ifdef TELEMETRY_ENABLED
+		INIT_EDITOR_TELEMETRY_OBJECT(gqoi_usage_obj_id, GQOI_VERSION_STR, "QOI/settings/");
+#endif
 	}
 #endif
 }
@@ -65,6 +74,10 @@ void GDE_EXPORT uninitialize_godot_qoi_module(ModuleInitializationLevel p_level)
 #ifdef DEBUG_ENABLED
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
 		upd_checker.unref();
+
+#ifdef TELEMETRY_ENABLED
+		DELETE_EDITOR_TELEMETRY_OBJECT(gqoi_usage_obj_id);
+#endif
 	}
 #endif
 }

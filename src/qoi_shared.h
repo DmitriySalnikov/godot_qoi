@@ -1,7 +1,8 @@
 #pragma once
 
 #include "compiler.h"
-#include "profiler.h"
+
+#include <stdarg.h>
 
 GODOT_WARNING_DISABLE()
 #include <godot_cpp/classes/project_settings.hpp>
@@ -22,12 +23,12 @@ GODOT_WARNING_RESTORE()
 
 #if DEV_ENABLED
 #define DEV_PRINT(text, ...) godot::UtilityFunctions::print(FMT_STR(godot::Variant(text), ##__VA_ARGS__))
-#define DEV_PRINT_STD(format, ...) Utils::_logv(false, false, format, ##__VA_ARGS__)
+#define DEV_PRINT_STD(format, ...) Utils::_logv(false, format, ##__VA_ARGS__)
 // Forced
-#define DEV_PRINT_STD_F(format, ...) Utils::_logv(false, true, format, ##__VA_ARGS__)
-#define DEV_PRINT_STD_ERR(format, ...) Utils::_logv(true, false, format, ##__VA_ARGS__)
+#define DEV_PRINT_STD_F(format, ...) Utils::_logv(false, format, ##__VA_ARGS__)
+#define DEV_PRINT_STD_ERR(format, ...) Utils::_logv(true, format, ##__VA_ARGS__)
 // Forced
-#define DEV_PRINT_STD_ERR_F(format, ...) Utils::_logv(true, true, format, ##__VA_ARGS__)
+#define DEV_PRINT_STD_ERR_F(format, ...) Utils::_logv(true, format, ##__VA_ARGS__)
 #else
 #define DEV_PRINT(text, ...)
 #define DEV_PRINT_STD(format, ...)
@@ -36,6 +37,7 @@ GODOT_WARNING_RESTORE()
 #define DEV_PRINT_STD_ERR_F(format, ...)
 #endif
 
+#define ZoneScoped
 #define FMT_STR(str, ...) String(str).format(Array::make(__VA_ARGS__))
 #define PRINT(text, ...) godot::UtilityFunctions::print(FMT_STR(godot::Variant(text), ##__VA_ARGS__))
 #define PRINT_ERROR(text, ...) godot::_err_print_error(__FUNCTION__, godot::get_file_name_in_repository(__FILE__).utf8().get_data(), __LINE__, FMT_STR(godot::Variant(text).stringify(), ##__VA_ARGS__))
@@ -80,3 +82,47 @@ static String get_file_name_in_repository(const String &name) {
 		PS()->add_property_info(info);             \
 		PS()->set_initial_value(path, def);        \
 	}
+
+class Utils {
+public:
+	static void _logv(bool p_err, const char *p_format, ...) {
+		ZoneScoped;
+#if DEBUG_ENABLED
+
+		const int static_buf_size = 512;
+		char static_buf[static_buf_size];
+		char *buf = static_buf;
+
+		va_list list_copy;
+		va_start(list_copy, p_format);
+
+		va_list p_list;
+		va_copy(p_list, list_copy);
+		int len = vsnprintf(buf, static_buf_size, p_format, p_list);
+		va_end(p_list);
+
+		std::string s;
+
+		MSVC_WARNING_DISABLE(6387);
+
+		if (len >= static_buf_size) {
+			char *buf_alloc = (char *)malloc((size_t)len + 1);
+			vsnprintf(buf_alloc, (size_t)len + 1, p_format, list_copy);
+			s = buf_alloc;
+			free(buf_alloc);
+		} else {
+			s = buf;
+		}
+		va_end(list_copy);
+
+		MSVC_WARNING_RESTORE(6387);
+
+		if (p_err) {
+			fprintf(stderr, "[Error] %s", s.c_str());
+		} else {
+			printf("[Info] %s", s.c_str());
+			// fflush(stdout);
+		}
+#endif
+	}
+};

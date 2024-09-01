@@ -1,63 +1,43 @@
 [configuration]
 
 entry_symbol = "godot_qoi_library_init"
-compatibility_minimum = "4.1.3"
+compatibility_minimum = "4.1.4"
 reloadable = false
 
 [dependencies]
 
-# example.x86_64 = { "relative or absolute path to the dependency" : "the path relative to the exported project", }
-
-# debug
-
-macos = { }
-windows.x86_64 = { }
-linux.x86_64 = { }
-
-web.wasm32 = {}
-
-android.arm32 = { }
-android.arm64 = { }
-android.x86_32 = { }
-android.x86_64 = { }
-
-# release
-
-macos.template_release = { }
-windows.template_release.x86_64 = { }
-linux.template_release.x86_64 = { }
-
-web.template_release.wasm32 = { }
-
-android.template_release.arm32 = { }
-android.template_release.arm64 = { }
-android.template_release.x86_32 = { }
-android.template_release.x86_64 = { }
+; example.x86_64 = { "relative or absolute path to the dependency" : "the path relative to the exported project" }
 
 [libraries]
 
-# debug
+; debug
 
-macos = "libs/libgodot_qoi.macos.template_debug.universal.dylib"
+macos = "libs/libgodot_qoi.macos.template_debug.universal.framework"
 windows.x86_64 = "libs/libgodot_qoi.windows.template_debug.x86_64.dll"
 linux.x86_64 = "libs/libgodot_qoi.linux.template_debug.x86_64.so"
 
-web.wasm32 = "libs/libgodot_qoi.web.template_debug.wasm32.wasm"
+web.wasm32.nothreads = "libs/libgodot_qoi.web.template_debug.wasm32.wasm"
+web.wasm32 = "libs/libgodot_qoi.web.template_debug.wasm32.threads.wasm"
 
 android.arm32 = "libs/libgodot_qoi.android.template_debug.arm32.so"
 android.arm64 = "libs/libgodot_qoi.android.template_debug.arm64.so"
 android.x86_32 = "libs/libgodot_qoi.android.template_debug.x86_32.so"
 android.x86_64 = "libs/libgodot_qoi.android.template_debug.x86_64.so"
 
-# release
+ios = "libs/libgodot_qoi.ios.template_debug.universal.dylib"
 
-macos.template_release = "libs/libgodot_qoi.macos.template_release.universal.dylib"
+; release
+
+macos.template_release = "libs/libgodot_qoi.macos.template_release.universal.framework"
 windows.template_release.x86_64 = "libs/libgodot_qoi.windows.template_release.x86_64.dll"
 linux.template_release.x86_64 = "libs/libgodot_qoi.linux.template_release.x86_64.so"
 
-web.template_release.wasm32 = "libs/libgodot_qoi.web.template_release.wasm32.wasm"
+web.template_release.wasm32.nothreads = "libs/libgodot_qoi.web.template_release.wasm32.wasm"
+web.template_release.wasm32 = "libs/libgodot_qoi.web.template_release.wasm32.threads.wasm"
 
 android.template_release.arm32 = "libs/libgodot_qoi.android.template_release.arm32.so"
 android.template_release.arm64 = "libs/libgodot_qoi.android.template_release.arm64.so"
 android.template_release.x86_32 = "libs/libgodot_qoi.android.template_release.x86_32.so"
 android.template_release.x86_64 = "libs/libgodot_qoi.android.template_release.x86_64.so"
+
+ios.template_release = "libs/libgodot_qoi.ios.template_release.universal.dylib"

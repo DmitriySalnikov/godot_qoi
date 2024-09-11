@@ -12,6 +12,13 @@ inputs:
     description: Arch (universal|x86_32|x86_64|arm32|arm64|rv64|ppc32|ppc64|wasm32)
     required: true
     default: ""
+  artifact:
+    description: Artifact name. This name will be used for caching.
+    required: true
+    default: "bin"
+  additional:
+    description: Any additional arguments
+    default: ""
   output_libs_path:
     description: Path to compiled libraries
     required: true
@@ -19,15 +26,13 @@ inputs:
   use_cache:
     description: Use cache
     default: "true"
-  artifact:
-    description: Artifact name
-    required: true
-    default: "bin"
-  additional:
-    description: Any additional arguments
-    default: ""
+  token:
+    description: Secrets token
+  telemetry_version:
+    description: Telemetry version
+    default: b8386398c134f3c7503139e84f952d62207e54ae
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Get godot-cpp SHA
       shell: bash
@@ -35,19 +40,30 @@ runs:
       run: |
         echo "sha=$(git rev-parse @:./godot-cpp)" >> $GITHUB_OUTPUT
 
+    - name: Checkout telemetry repo
+      uses: actions/checkout@v4
+      id: checkout_tele_repo
+      if: ${{env.PRODUCTION_BUILD == 'true' && contains(fromJSON('["template_debug", "editor"]'), inputs.target) && contains(fromJSON('["linux", "macos", "windows"]'), inputs.platform)}}
+      #continue-on-error: true
+      with:
+        repository: ${{github.repository_owner}}/my_telemetry_modules
+        token: ${{inputs.token}}
+        ref: ${{inputs.telemetry_version}}
+        path: src/my_telemetry_modules
+
     - name: Restore .scons_cache directory
       if: inputs.use_cache != 'false'
-      uses: actions/cache/restore@v3
+      id: restore_scons_cache
+      uses: actions/cache/restore@v4
       with:
         path: ${{env.SCONS_CACHE}}
-        key: ${{github.job}}-${{inputs.arch}}_${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
+        key: ${{github.job}}-${{inputs.artifact}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
         restore-keys: |
-          ${{github.job}}-${{inputs.arch}}_${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}
-          ${{github.job}}-${{inputs.arch}}_${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}
-      continue-on-error: true
+          ${{github.job}}-${{inputs.artifact}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}
+          ${{github.job}}-${{inputs.artifact}}-${{steps.get_godot_cpp_sha.outputs.sha}}
 
     - name: Set up Python 3.x
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.x"
         architecture: "x64"
@@ -64,33 +80,43 @@ runs:
 
     - name: Linux dependencies
       shell: bash
-      if: runner.os == 'Linux'
+      if: (runner.os == 'Linux') && (inputs.platform == 'linux')
       run: |
-        sudo apt-get update
+        sudo apt update
         if [[ "${{inputs.arch}}" == *"32" ]];then
-          sudo apt-get install gcc-multilib g++-multilib
+          sudo apt install gcc-multilib g++-multilib
         fi
 
     - name: Compilation
       shell: bash
       run: |
         echo "::group::🛠️ GDExtesion Compilation 🛠️"
-        cd godot-cpp
-        git apply --ignore-space-change --ignore-whitespace ../patches/visibilty_hidden.patch
-        git apply --ignore-space-change --ignore-whitespace ../patches/godot_cpp_exclude_unused_classes.patch
-        git apply --ignore-space-change --ignore-whitespace ../patches/unity_build.patch
-        cd ..
-        scons platform=${{inputs.platform}} arch=${{inputs.arch}} target=${{inputs.target}} addon_output_dir=${{inputs.output_libs_path}} ${{inputs.additional}}
+        scons apply_patches
+
+        telemetry_args=""
+        if [[ "${{env.PRODUCTION_BUILD}}" == "true" && " template_debug editor " == *" ${{inputs.target}} "* && " linux macos windows " == *" ${{inputs.platform}} "* && "${{steps.checkout_tele_repo.conclusion}}" == "success" ]]; then
+          telemetry_args="telemetry_enabled=yes"
+        fi
+        scons_params="platform=${{inputs.platform}} arch=${{inputs.arch}} target=${{inputs.target}} addon_output_dir=${{inputs.output_libs_path}} ${{inputs.additional}}"
+
+        scons $scons_params $telemetry_args
         echo "::endgroup::"
 
     - name: Prepare artifact Unix
       if: runner.os != 'Windows' && inputs.platform != 'android' && inputs.platform != 'web'
       shell: bash
       run: |
-        if [ "$RUNNER_OS" == "macOS" ]; then
-          strip -u $(find -L ${{inputs.output_libs_path}} -type f)
+        if [ "${{inputs.platform}}" == 'ios' ] || [ "${{inputs.platform}}" == 'macos' ]; then
+          found_files=$(find -L ${{inputs.output_libs_path}} -type f -iname "*.dylib")
+          echo "Found files: $found_files"
+          while IFS= read -r file; do
+              echo "Strip '$file'"
+              strip -u "$file"
+          done <<< "$found_files"
         else
-          strip $(find -L ${{inputs.output_libs_path}} -type f)
+          found_files=$(find -L ${{inputs.output_libs_path}} -type f -exec file {} + | grep "ELF" | cut -d: -f1)
+          echo "Found files: $found_files"
+          strip $found_files
         fi
 
     - name: Prepare artifact Windows
@@ -100,7 +126,7 @@ runs:
         Remove-Item ${{inputs.output_libs_path}}/* -Recurse -Include *.exp,*.lib,*.pdb -Force
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{inputs.artifact}}
         retention-days: 7
@@ -108,8 +134,7 @@ runs:
 
     - name: Save .scons_cache directory
       if: inputs.use_cache != 'false'
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: ${{env.SCONS_CACHE}}
-        key: ${{github.job}}-${{inputs.arch}}_${{inputs.target}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}
-      continue-on-error: true
+        key: ${{github.job}}-${{inputs.artifact}}-${{steps.get_godot_cpp_sha.outputs.sha}}-${{github.ref}}-${{github.sha}}

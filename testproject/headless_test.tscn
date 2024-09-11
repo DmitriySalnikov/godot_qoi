@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://bq1rfb6je8rk6"]
+
+[ext_resource type="PackedScene" uid="uid://b32t735vtvy16" path="res://testsuite/TestScene.tscn" id="1_jehmx"]
+
+[sub_resource type="GDScript" id="GDScript_wbn2v"]
+script/source = "extends Node
+
+
+func _ready():
+	if FileAccess.file_exists(\"SUCCESS\"):
+		DirAccess.remove_absolute(\"SUCCESS\")
+	
+	print(\"QOI Version: \", QOI._get_version())
+	print(\"Engine Version: \", Engine.get_version_info())
+	print(\"Distribution: \", OS.get_distribution_name())
+	print(\"OS Name: \", OS.get_name())
+	print(\"OS Version: \", OS.get_version())
+	print(\"CPU: \", OS.get_processor_name())
+	print(\"CPU Count: \", OS.get_processor_count())
+	print(\"CPU Architecture: \", Engine.get_architecture_name())
+	
+	var res = await $Runner.call(&\"test_api\") if $Runner.has_method(&\"test_api\") else false
+	print(\"Headless runner returns: \", res)
+	
+	if res:
+		var f = FileAccess.open(\"SUCCESS\", FileAccess.WRITE)
+		f.store_8(1)
+	
+	print()
+	get_tree().quit(0 if res == true else 1)
+"
+
+[node name="HeadlessTest" type="Node"]
+script = SubResource("GDScript_wbn2v")
+
+[node name="Runner" parent="." instance=ExtResource("1_jehmx")]
+run_benchmark = false

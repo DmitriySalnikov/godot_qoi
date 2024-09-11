@@ -17,6 +17,7 @@ protected:
 	static void _bind_methods();
 
 public:
+	static String _get_version();
 	static Ref<Image> read(String path);
 	static Ref<Image> decode(const PackedByteArray &data);
 	static Error write(String path, Ref<Image> img);

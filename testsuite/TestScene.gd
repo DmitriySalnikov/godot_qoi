@@ -2,7 +2,7 @@
 extends Control
 
 const img_dir = "res://testsuite/images/"
-@export var run_tests = false
+@export var run_tests = true
 @export var run_benchmark = true
 @export_range(0, 256) var bench_runs := 4
 @export_range(1, 256) var frames_to_render := 99
@@ -20,31 +20,28 @@ var tex_to_test_save := ImageTexture.create_from_image(Image.create_from_data(1,
 func _ready() -> void:
 	if not Engine.is_editor_hint():
 		$ViewportContainer.queue_free()
-		test_api()
+		
+		@warning_ignore("return_value_discarded")
+		QOI.write("user://example.qoi", load("res://icon.svg").get_image())
+		var img = QOI.read("user://example.qoi")
+		var enc = QOI.encode(img)
+		var dec = QOI.decode(enc)
+		
+		var tex: = ImageTexture.create_from_image(dec)
+		$TextureRect.texture = tex
+		
+		if tex.get_image().is_empty():
+			printerr("Basic tests failed. Example is not working...")
+			return
+		
+		if run_tests:
+			test_api()
 		if run_benchmark:
 			await get_tree().process_frame
 			start_bench()
 
 
 func test_api():
-	@warning_ignore("return_value_discarded")
-	QOI.write("user://example.qoi", load("res://icon.svg").get_image())
-	var img = QOI.read("user://example.qoi")
-	var enc = QOI.encode(img)
-	var dec = QOI.decode(enc)
-	
-	var tex: = ImageTexture.create_from_image(dec)
-	$TextureRect.texture = tex
-	
-	# More tests
-	
-	if !run_tests:
-		return
-	
-	if tex.get_image().is_empty():
-		printerr("Tests failed. Example is not working...")
-		return
-	
 	#################
 	# prepare
 	var test_dir = "user://tests/"
@@ -93,7 +90,7 @@ func test_api():
 	assert(QOI.encode(null).size() == 0, "Encode null Image can't be performed.")
 	assert(QOI.encode(Image.new()).size() == 0, "Encode empty Image can't be performed.")
 	
-	if !OS.has_feature("mobile"):
+	if !OS.has_feature("mobile") and !OS.has_feature("web"):
 		var unsupported_image : Image = good_image.duplicate()
 		@warning_ignore("return_value_discarded")
 		unsupported_image.compress(Image.COMPRESS_S3TC, Image.COMPRESS_SOURCE_GENERIC, Image.ASTC_FORMAT_4x4)
@@ -110,6 +107,9 @@ func test_api():
 	ResourceSaver.save(tex_to_test_save, test_dir.path_join("1x1_tex.qoi"))
 	assert(QOI.read(test_dir.path_join("1x1_img.qoi")), "Image must be saved to QOI via ResourceSaver and loaded correctly.")
 	assert(QOI.read(test_dir.path_join("1x1_tex.qoi")), "Texture must be saved to QOI via ResourceSaver and loaded correctly.")
+	
+	print("Tests are completed!")
+	return true
 
 
 func start_bench():

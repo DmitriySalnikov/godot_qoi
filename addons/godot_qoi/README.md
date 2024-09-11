@@ -1,10 +1,10 @@
-<img src="https://github.com/DmitriySalnikov/godot_qoi/blob/5bd25a2dc2ea907041b4c9a7f4ae12bc0ae19a94/icon.png?raw=true" width=128/>
+<img src="/images/icon.png" width=128/>
 
 # godot_qoi
 
 QOI ([Quite OK Image Format](https://github.com/phoboslab/qoi)) integration for Godot Engine 4.x.
 
-This is a GDExtension library. Includes precompiled binaries for `Windows`, `Linux`, `macOS`, `Android` and `Web`, but it must compile for each platform which Godot Engine supports.
+This is a GDExtension library. Includes precompiled binaries for `Windows`, `Linux`, `macOS`, `iOS`, `Android` and `Web`, but it must compile for each platform which Godot Engine supports.
 
 [Godot 3 version](https://github.com/DmitriySalnikov/godot_qoi/tree/godot_3)
 
@@ -23,15 +23,23 @@ This is a GDExtension library. Includes precompiled binaries for `Windows`, `Lin
 
 https://user-images.githubusercontent.com/7782218/152955097-285f81dc-2b65-4f80-bd6a-890b7280d806.mp4
 
-## Support
+## Support me
 
-[<img src="https://upload.wikimedia.org/wikipedia/commons/8/8f/QIWI_logo.svg" alt="qiwi" width=90px/>](https://qiwi.com/n/DMITRIYSALNIKOV)
+Your support adds motivation to develop my public projects.
 
-[<img src="https://static.boosty.to/assets/images/boostyDomainLogo.5Vlxt.svg" alt="Boosty" width=120px/>](https://boosty.to/dmitriysalnikov/donate)
+<a href="https://boosty.to/dmitriysalnikov/donate"><img src="/images/boosty.png" alt="Boosty" width=150px/></a>
+
+<img src="/images/USDT-TRC20.png" alt="USDT-TRC20" width=150px/>
+
+<b>USDT-TRC20 TEw934PrsffHsAn5M63SoHYRuZo984EF6v</b>
 
 ## Download
 
-To download, use the [Godot Asset Library](https://godotengine.org/asset-library/asset/1619) or download the archive by clicking the button at the top of the main repository page: `Code -> Download ZIP`, then unzip it to your project folder. Or use one of the stable versions from the [GitHub Releases](https://github.com/DmitriySalnikov/godot_qoi/releases) page (just download one of the "Source Codes" in assets).
+To download, use the [Godot Asset Library](https://godotengine.org/asset-library/asset/1619) or use one of the stable versions from the [GitHub Releases](https://github.com/DmitriySalnikov/godot_qoi/releases) page (just download the first archive from the assets, not one of the `Source Code`s).
+
+> [!NOTE]
+>
+> If you download manually, first go to the folder with the name of the addon in the archive, then copy its contents to your project.
 
 ## Editor integration
 

@@ -39,7 +39,7 @@ To download, use the [Godot Asset Library](https://godotengine.org/asset-library
 
 > [!NOTE]
 >
-> If you download manually, first go to the folder with the name of the addon in the archive, then copy its contents to your project.
+> If you download the addon manually, first go to the folder at the root of the archive, and then copy its contents to your project.
 
 ## Editor integration
 

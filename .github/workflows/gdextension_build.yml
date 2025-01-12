@@ -43,14 +43,19 @@ env:
   SCONS_CACHE: ${{github.workspace}}/.scons-cache/
   USE_CACHE: ${{!format('{0}', inputs.use_cache) && 'true' || format('{0}', inputs.use_cache)}} # Default true
   PRODUCTION_BUILD: ${{!format('{0}', inputs.production_build) && 'false' || format('{0}', inputs.production_build)}} # Default false
+  ENVIRONMENT_NAME: ${{inputs.production_build == 'true' && 'production' || ''}}
   OUTPUT_LIBS_PATH: bin
   FORCE_DISABLE_UNITY: yes
-  GH_TOKEN: ${{ github.token }}
 
 jobs:
   windows-gdextension:
     name: 🏁 Windows
     runs-on: windows-latest
+    environment: ${{inputs.production_build == true && 'production' || ''}}
+    env:
+      TELEMETRY_GQOI_APP_ID: ${{secrets.TELEMETRY_GQOI_APP_ID}}
+      TELEMETRY_GQOI_HOST: ${{secrets.TELEMETRY_GQOI_HOST}}
+      TELEMETRY_DST_FILE_KEY: ${{secrets.TELEMETRY_DST_FILE_KEY}}
 
     strategy:
       fail-fast: false
@@ -74,13 +79,17 @@ jobs:
           additional: lto=yes
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
           use_cache: ${{env.USE_CACHE}}
-          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
   linux-gdextension:
     name: 🐧 Linux
     runs-on: ubuntu-20.04
+    environment: ${{inputs.production_build == true && 'production' || ''}}
+    env:
+      TELEMETRY_GQOI_APP_ID: ${{secrets.TELEMETRY_GQOI_APP_ID}}
+      TELEMETRY_GQOI_HOST: ${{secrets.TELEMETRY_GQOI_HOST}}
+      TELEMETRY_DST_FILE_KEY: ${{secrets.TELEMETRY_DST_FILE_KEY}}
 
     strategy:
       fail-fast: false
@@ -104,13 +113,17 @@ jobs:
           additional: lto=yes
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
           use_cache: ${{env.USE_CACHE}}
-          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
   macos-gdextension:
     name: 🍏 MacOS
     runs-on: macos-latest
+    environment: ${{inputs.production_build == true && 'production' || ''}}
+    env:
+      TELEMETRY_GQOI_APP_ID: ${{secrets.TELEMETRY_GQOI_APP_ID}}
+      TELEMETRY_GQOI_HOST: ${{secrets.TELEMETRY_GQOI_HOST}}
+      TELEMETRY_DST_FILE_KEY: ${{secrets.TELEMETRY_DST_FILE_KEY}}
 
     strategy:
       fail-fast: false
@@ -134,7 +147,6 @@ jobs:
           additional: lto=yes macos_deployment_target=10.14
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
           use_cache: ${{env.USE_CACHE}}
-          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
@@ -164,13 +176,12 @@ jobs:
           additional: lto=yes
           output_libs_path: ${{env.OUTPUT_LIBS_PATH}}
           use_cache: ${{env.USE_CACHE}}
-          token: ${{secrets.TELEMETRY_TOKEN}}
 
   # ============================================
 
   android-gdextension:
     name: 🤖 Android
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
@@ -219,7 +230,7 @@ jobs:
 
   web-gdextension:
     name: 🕸 Web
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
@@ -270,7 +281,7 @@ jobs:
         ios-gdextension,
       ]
     name: 📦 Collect GDExtension binaries
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       artifact_name: ${{steps.output_info.outputs.artifact_name}}
 

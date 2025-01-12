@@ -2,6 +2,7 @@
 
 from SCons.Script import SConscript
 from SCons.Script.SConscript import SConsEnvironment
+from SCons.Script import ARGLIST, ARGUMENTS, BUILD_TARGETS, COMMAND_LINE_TARGETS, DEFAULT_TARGETS
 
 import SCons, SCons.Script
 import sys, os, platform
@@ -10,6 +11,9 @@ import lib_utils, lib_utils_external
 # Fixing the encoding of the console
 if platform.system() == "Windows":
     os.system("chcp 65001")
+
+SConsEnvironment.EnsureSConsVersion(4, 0)
+SConsEnvironment.EnsurePythonVersion(3, 8)
 
 # Project config
 project_name = "Godot QOI"
@@ -21,12 +25,12 @@ src_folder = "src"
 patches_to_apply = [
     "patches/godot_cpp_exclude_unused_classes.patch",  # Removes unused godot-cpp classes from the build process
     "patches/unity_build.patch",  # Speeds up the build by merging the source files. It can increase the size of assemblies.
-    "patches/web_threads.patch",  # Adds the build flag that appeared in Godot 4.3. Required for a web build compatible with Godot 4.3.
     "patches/big_int_fix.patch",  # Fixes runtime link errors
 ]
 
 print(
-    f"If you add new source files (e.g. .cpp, .c), do not forget to specify them in '{src_folder}/default_sources.json'.\n\tOr add them to 'setup_defines_and_flags' inside 'SConstruct'."
+    f"If you add new source files (e.g. .cpp, .c), do not forget to specify them in '{src_folder}/default_sources.json'."
+    + f"\n\tOr add them to 'setup_defines_and_flags' inside 'SConstruct'."
 )
 print("To apply git patches, use 'scons apply_patches'.")
 # print("To build cmake libraries, use 'scons build_cmake'.")
@@ -53,13 +57,21 @@ def setup_options(env: SConsEnvironment, arguments):
 
 
 # Additional compilation flags
-def setup_defines_and_flags(env: SConsEnvironment, src_out):
+def setup_defines_and_flags(env: SConsEnvironment, src_out: list):
     # Add more sources to `src_out` if needed
 
     if env["telemetry_enabled"]:
-        tele_src = "my_telemetry_modules/GDExtension/usage_time_reporter.cpp"
+        tele_src = "dst_modules/GDExtension/usage_time_reporter.cpp"
         if os.path.exists(os.path.join(src_folder, tele_src)):
-            env.Append(CPPDEFINES=["TELEMETRY_ENABLED", "TELEMETRY_PROJECT_GQOI"])
+            env.Append(
+                CPPDEFINES=[
+                    "TELEMETRY_ENABLED",
+                    "UsageTimeReporterGodotObj=_UsageTimeReporterGodotObjGQOI",
+                    'TELEMETRY_DST_FILE_KEY=\\"' + os.environ.get("TELEMETRY_DST_FILE_KEY", '\\"') + '\\"',
+                    'TELEMETRY_APP_ID=\\"' + os.environ.get("TELEMETRY_GQOI_APP_ID", '\\"') + '\\"',
+                    'TELEMETRY_HOST=\\"' + os.environ.get("TELEMETRY_GQOI_HOST", '\\"') + '\\"',
+                ]
+            )
             src_out.append(tele_src)
             print("Compiling with telemetry support!")
         else:
@@ -94,7 +106,7 @@ def setup_defines_and_flags(env: SConsEnvironment, src_out):
     print()
 
 
-def generate_sources_for_resources(env, src_out):
+def generate_sources_for_resources(env: SConsEnvironment, src_out: list):
     # Array of (path, is_text)
     shared_files = [
         ("src/resources/extendable_meshes.gdshader", True),
@@ -134,6 +146,14 @@ additional_src = []
 setup_options(env, args)
 setup_defines_and_flags(env, additional_src)
 #generate_sources_for_resources(env, additional_src)
+
+scons_cache_path = os.environ.get("SCONS_CACHE")
+if scons_cache_path is None:
+    # store all obj's in a dedicated folder
+    env["SHOBJPREFIX"] = "#obj/"
+else:
+    env.CacheDir(scons_cache_path)
+    env.Decider("MD5")
 
 extra_tags = ""
 

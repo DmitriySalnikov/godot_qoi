@@ -10,9 +10,7 @@
                 "UNICODE",
                 "_UNICODE",
                 "DEBUG_ENABLED",
-                "DEV_ENABLED",
-                "TELEMETRY_ENABLED",
-                "TELEMETRY_PROJECT_GQOI"
+                "DEV_ENABLED"
             ],
             "windowsSdkVersion": "10.0.22000.0",
             "compilerPath": "cl.exe",

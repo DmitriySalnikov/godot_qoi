@@ -20,7 +20,7 @@ Ref<QOIResourceSaver> qoi_resource_saver;
 #include "asset_library_update_checker.h"
 Ref<AssetLibraryUpdateChecker> upd_checker;
 #ifdef TELEMETRY_ENABLED
-#include "my_telemetry_modules/GDExtension/usage_time_reporter.h"
+#include "dst_modules/GDExtension/usage_time_reporter.h"
 DEFINE_TELEMETRY_OBJECT_ID(gqoi_usage_obj_id);
 #endif
 #endif
@@ -55,7 +55,7 @@ void GDE_EXPORT initialize_godot_qoi_module(ModuleInitializationLevel p_level) {
 		upd_checker.instantiate();
 
 #ifdef TELEMETRY_ENABLED
-		INIT_EDITOR_TELEMETRY_OBJECT(gqoi_usage_obj_id, GQOI_VERSION_STR, "QOI/settings/");
+		INIT_EDITOR_TELEMETRY_OBJECT(gqoi_usage_obj_id, "Godot QOI", TELEMETRY_APP_ID, GQOI_VERSION_STR, "QOI/settings/", TELEMETRY_HOST, "telemetry_gqoi.json");
 #endif
 	}
 #endif
